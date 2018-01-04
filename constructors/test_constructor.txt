@@ -1,0 +1,50 @@
+
+•--------------------------------------------------------------------------------------------------•
+| •----------------------------------------------------------------------------------------------• |
+| |                                                                                              | |
+| |                                                                                              | |
+| |                                          - RIPLEY -                                          | |
+| |                                                                                              | |
+| |                                                                                              | |
+| •----------------------------------------------------------------------------------------------• |
+•--------------------------------------------------------------------------------------------------•
+
+CONSTRUCTOR SHEET
+V4.01, 01/08/18
+
+This task sheet will be copied into your RED (RIPLEY Execution Directory).
+
+1. Lines beginning with <COMMAND> key will be read into the task reader.
+2. Required commands are denoted by the (*) symbol.
+3. Comments can be created using the # symbol. Commented text in the <COMMAND> key will not be read.
+
+•--------------------------------------------------------------------------------------------------•
+|                                                                                                  |
+|                                      - CONSTRUCTOR PARAMS -                                      |
+|                                                                                                  |
+•--------------------------------------------------------------------------------------------------•
+
+<JOB NAME> FEATURECOUNT
+
+# Type of input file into this command (BAM, FASTQ, TXT, PATH)
+<INPUT FILES> BAM
+
+# Stage (PRE, INDEX, ALIGN, POST)
+<STAGE> POST
+
+# Type of output for this command (TXT, HTML)
+<OUTPUT TYPE> TXT
+
+# Sbatch parameters
+<TIME> 2:00:00
+<PARTITION> default
+<CORES> default
+<MEM PER CPU> default
+
+<SCRIPT COMMAND> {
+
+module load <SUBREAD MODULE>
+
+featureCounts -g gene_id <PAIRED> <FEATURECOUNT PARAMS> -a <USE ANNO> -o <FEATURECOUNT DIR>/<PARSED BAM NAME> <ALIGN DIR>
+
+}
