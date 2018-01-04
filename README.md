@@ -1,0 +1,1 @@
+PROMETHEUS is the replacement for RIPLEY, currently development stage. It will contain far more flexible support scripts, allowing user additions of functions to the pipeline. It will eventually replace RIPLEY.
