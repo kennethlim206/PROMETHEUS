@@ -24,16 +24,21 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<JOB NAME> FEATURECOUNT
+<FUNCTION NAME> FEATURECOUNT
 
-# Type of input file into this command (BAM, FASTQ, TXT, PATH)
+# Suffix of input file into this command (FASTQ, BAM, BAMS, TXT, URL, etc.)
 <INPUT FILES> BAM
 
-# Stage (PRE, INDEX, ALIGN, POST)
-<STAGE> POST
+# The stage in RIPLEY where your input data comes from (RAW, INDEX, ALIGN, etc.)
+<STAGE> ALIGN
 
-# Type of output for this command (TXT, HTML)
+# Type of output for this command (FASTQ, FA, GTF, INDEX, BAM, TXT, HTML, )
 <OUTPUT TYPE> TXT
+
+# Dependecy category (MANUAL, AUTO:[JOB NAME])
+<DEPENDENCY> MANUAL
+
+
 
 # Sbatch parameters
 <TIME> 2:00:00
@@ -45,6 +50,6 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 
 module load <SUBREAD MODULE>
 
-featureCounts -g gene_id <PAIRED> <FEATURECOUNT PARAMS> -a <USE ANNO> -o <FEATURECOUNT DIR>/<PARSED BAM NAME> <ALIGN DIR>
+featureCounts -g gene_id <PAIRED> <FEATURECOUNT PARAMS> -a <USE ANNO> -o <FEATURECOUNT DIR>/<INPUT NAME> <ALIGN DIR>
 
 }

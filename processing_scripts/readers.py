@@ -2,30 +2,67 @@ import os
 import sys
 
 # Reader for tasks and constructors
-def default_reader(f):
+def task_reader(f):
 	file = open(f, "r")
-	d = dict()
+	lines = file.readlines()
+	file.close()
 
-	for line in file:
-		line = line.replace("\n", "")
+	d = dict()
+	for l in lines:
+		l = l.replace("\n", "")
 
 		# Ignore commented out text
-		if "#" in line:
-			line = line.split("#")[0]
+		if "#" in l:
+			l = l.split("#")[0]
 
 		# Parse <COMMAND> lines and input into dictionary
-		if len(line) > 0:
-			if line[0] == "<": 
-				task_name = line[1:].split(">", 1)[0]
-				task_val = line.split(">", 1)[1]
+		if len(l) > 0:
+			if l[0] == "<": 
+				cmd_name = l[1:].split(">", 1)[0]
+				cmd_val = l.split(">", 1)[1]
 
-				if task_val[0] == " ":
-					task_val = task_val.replace(" ", "", 1)
+				if cmd_val[0] == " ":
+					cmd_val = cmd_val.replace(" ", "", 1)
 
+				d[cmd_name] = cmd_val
+	return d
 
-				d[task_name] = task_val
-
+# Reader for function constructors
+def constructor_reader(f):
+	file = open(f, "r")
+	lines = file.readlines()
 	file.close()
+
+	d = dict()
+	for i in range(0,len(lines)):
+		l = lines[i]
+		l = l.replace("\n", "")
+
+		# Ignore commented out text
+		if "#" in l:
+			l = l.split("#")[0]
+
+		# Parse <COMMAND> lines and input into dictionary
+		if len(l) > 0:
+			if l[0] == "<": 
+				cmd_name = l[1:].split(">", 1)[0]
+				cmd_val = l.split(">", 1)[1]
+
+				# Sbatch script command spans multiple lines
+				if cmd_name == "SCRIPT COMMAND":
+					cmd_val = ""
+					cmd_count = i + 1
+					cmd_line = lines[cmd_count]
+
+					while "}" not in cmd_line:
+						cmd_val += cmd_line
+						cmd_count += 1
+						cmd_line = lines[cmd_count]
+
+				if cmd_val[0] == " ":
+					cmd_val = cmd_val.replace(" ", "", 1)
+
+				d[cmd_name] = cmd_val
 	return d
 
 # Reader for special genome table files
@@ -50,22 +87,22 @@ def genome_reader(f, ID):
 			break
 
 	d = dict()
-	for line in choose_lines:
-		line = line.replace("\n", "")
+	for l in choose_lines:
+		l = l.replace("\n", "")
 
 		# Ignore commented out text
-		if "#" in line:
-			line = line.split("#")[0]
+		if "#" in l:
+			l = l.split("#")[0]
 
 		# Parse <COMMAND> lines and input into dictionary
-		if len(line) > 0:
-			if line[0] == "<": 
-				task_name = line[1:].split(">", 1)[0]
+		if len(l) > 0:
+			if l[0] == "<": 
+				cmd_name = l[1:].split(">", 1)[0]
 
-				task_val = line.split(">", 1)[1]
-				task_val = task_val.replace(" ", "")
+				cmd_val = l.split(">", 1)[1]
+				cmd_val = cmd_val.replace(" ", "")
 
-				d[task_name] = task_val
+				d[cmd_name] = cmd_val
 	return d
 
 
