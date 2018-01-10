@@ -1,0 +1,12 @@
+job	input_type	stage
+pull	url	prep
+pull_srr	suffix	prep
+srr_convert	suffix	prep
+customize	specified names	prep
+index	specified names	index
+align	fastqs	align
+fastqc	fastqs	post
+rseqc	bams	post
+feature_count	bams post
+mpileup	bams	post
+total	bams	post

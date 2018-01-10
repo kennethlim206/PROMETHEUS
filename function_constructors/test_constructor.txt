@@ -12,10 +12,10 @@
 CONSTRUCTOR SHEET
 V4.01, 01/08/18
 
-This task sheet will be copied into your RED (RIPLEY Execution Directory).
+This function constructor sheet will be copied into your RED (RIPLEY Execution Directory).
 
-1. Lines beginning with <COMMAND> key will be read into the task reader.
-2. Required commands are denoted by the (*) symbol.
+1. Lines beginning with <COMMAND> key will be read into the constructor reader.
+2. All command lines are required.
 3. Comments can be created using the # symbol. Commented text in the <COMMAND> key will not be read.
 
 •--------------------------------------------------------------------------------------------------•
@@ -26,19 +26,8 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 
 <FUNCTION NAME> FEATURECOUNT
 
-# Suffix of input file into this command (FASTQ, BAM, BAMS, TXT, URL, etc.)
-<INPUT FILES> BAM
-
-# The stage in RIPLEY where your input data comes from (RAW, INDEX, ALIGN, etc.)
-<STAGE> ALIGN
-
-# Type of output for this command (FASTQ, FA, GTF, INDEX, BAM, TXT, HTML, )
-<OUTPUT TYPE> TXT
-
 # Dependecy category (MANUAL, AUTO:[JOB NAME])
 <DEPENDENCY> MANUAL
-
-
 
 # Sbatch parameters
 <TIME> 2:00:00
@@ -46,10 +35,45 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 <CORES> default
 <MEM PER CPU> default
 
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - INPUT CMDs -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Use the variable <INPUT FILE> in the <SCRIPT COMMAND> below
+
+# Input files can be found in this directory (URL, RAW, INDEX, POST:[NAME])
+<INPUT DIR> POST:ALIGN
+
+# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX])
+<INPUT SUFFIX> BAM
+
+# Analyze one file per script command or all files in a single command (SINGLE/MULT)
+<INPUT MULT> SINGLE
+
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - OUTPUT CMD -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Output files can be found in this directory (RAW, INDEX, POST:[JOB NAME])
+<OUTPUT DIR> POST:FEATURECOUNT
+
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - SCRIPT CMD -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Any task sheet variables may be used below.
+# The shell scripts will be created in the output directory's RED.
+
 <SCRIPT COMMAND> {
 
 module load <SUBREAD MODULE>
 
-featureCounts -g gene_id <PAIRED> <FEATURECOUNT PARAMS> -a <USE ANNO> -o <FEATURECOUNT DIR>/<INPUT NAME> <ALIGN DIR>
+featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES>.fcounts.txt <INPUT FILES>
 
 }

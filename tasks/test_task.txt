@@ -110,7 +110,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •---------------------------------------- ALIGN PARAMETERS ----------------------------------------•
 
 # Full file path to STAR align output directory. (*)
-<OUTPUT DIR> /share/nordlab/users/kjulim/TEST_DIR
+<POST DIR> /Users/kennethlim/Desktop/TEST_DIR
 
 # Whether sample fastq's are compressed or not (.gz, .bzip2, none). (*)
 <ZIPPED> .gz

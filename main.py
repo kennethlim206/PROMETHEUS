@@ -4,6 +4,7 @@ import imp
 
 # Import processing modules
 readers = imp.load_source("readers", "./processing_scripts/readers.py")
+interpreter = imp.load_source("interpreter", "./processing_scripts/interpreter.py")
 
 # User interface
 def main():
@@ -63,7 +64,7 @@ def main():
 			print " ------------------------------------------------------------------------------- "
 
 			# Display all functions from constructor table
-			constructor_files = open("./function_constructors/constructor_table.txt", "r")
+			constructor_files = open("./function_constructors/chooseFunction_table.txt", "r")
 			constructor_d = dict()
 			for line in constructor_files:
 				if "#" not in line:
@@ -106,9 +107,7 @@ def main():
 			my_constructor = readers.constructor_reader(constructor_input_path)
 			my_genome = readers.genome_reader("./genome_tables/%s" % my_task["REF TABLE"], my_task["REF ID"])
 
-			print "-------"
-			print my_constructor["SCRIPT COMMAND"]
-			print "-------"
+			interpreter.interpret(my_constructor, my_task)
 
 
 
