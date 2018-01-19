@@ -8,6 +8,7 @@ def task_reader(f):
 	file.close()
 
 	d = dict()
+	d["PATH"] = f
 	for l in lines:
 		l = l.replace("\n", "")
 
@@ -34,6 +35,7 @@ def constructor_reader(f):
 	file.close()
 
 	d = dict()
+	d["PATH"] = f
 	for i in range(0,len(lines)):
 		l = lines[i]
 		l = l.replace("\n", "")

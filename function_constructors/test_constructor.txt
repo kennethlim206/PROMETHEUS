@@ -69,11 +69,13 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 # Any task sheet variables may be used below.
 # The shell scripts will be created in the output directory's RED.
+# Automatically stored variables for use here:
+# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>
 
 <SCRIPT COMMAND> {
 
 module load <SUBREAD MODULE>
 
-featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES>.fcounts.txt <INPUT FILES>
+featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES TRIMMED>.fcounts.txt <INPUT FILES FULL>
 
 }

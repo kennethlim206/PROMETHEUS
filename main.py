@@ -79,7 +79,6 @@ def main():
 
 			constructor_files.close()
 
-			print ""
 			print "exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""
@@ -107,7 +106,7 @@ def main():
 			my_constructor = readers.constructor_reader(constructor_input_path)
 			my_genome = readers.genome_reader("./genome_tables/%s" % my_task["REF TABLE"], my_task["REF ID"])
 
-			interpreter.interpret(my_constructor, my_task)
+			interpreter.interpret(my_constructor, my_task, my_genome)
 
 
 

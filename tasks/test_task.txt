@@ -82,13 +82,13 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 # These are normally .fa and .gtf respectively.
 
 # File name of reference genome additions.
-<REF ADD> C1-singlecell-markers.fa
+<FA ADD> C1-singlecell-markers.fa
 
 # File name of annotation additions.
 <ANNO ADD> annotations.CUSTOM.txt
 
 # File name of new custom reference genome.
-<CUSTOM REF> reference_custom.fa
+<CUSTOM FA> reference_custom.fa
 
 # File name of new custom annotation file.
 <CUSTOM ANNO> annotation_custom.gtf
