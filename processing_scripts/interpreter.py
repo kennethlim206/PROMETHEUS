@@ -133,13 +133,48 @@ def interpret(cd, td, gd):
 			if "<%s>" % var in cmd:
 				cmd = cmd.replace("<%s>" % var, cd[var])
 
-	# Create a command for each INPUT FILE
+	# Write script
 	for i in range(0, len(cd["INPUT FILES FULL"])):
 		cmd_ind = cmd
-		cmd_ind = cmd_ind.replace("<INPUT FILES FULL>", cd["INPUT FILES FULL"][i])
-		cmd_ind = cmd_ind.replace("<INPUT FILES TRIMMED>", cd["INPUT FILES TRIMMED"][i])
+		input_full_ind = cd["INPUT FILES FULL"][i]
+		input_trim_ind = cd["INPUT FILES TRIMMED"][i]
 
-		print cmd_ind
+		cmd_ind = cmd_ind.replace("<INPUT FILES FULL>", input_full_ind)
+		cmd_ind = cmd_ind.replace("<INPUT FILES TRIMMED>", input_trim_ind)
+
+		# Place in RED of OUTPUT DIR
+		script_ind = open("%s/%s.sh" % (record["scripts"], input_trim_ind), "w")
+
+		script_ind.write("#!/bin/bash -l\n\n")
+
+		# Required for sbatch script
+		script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
+		script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
+		script_ind.write("#SBATCH --output=%s/%s,out\n" % (record["output"], input_trim_ind))
+		script_ind.write("#SBATCH --error=%s/%s.err\n" % (record["error"], input_trim_ind))
+
+		# Optional for sbatch script
+		if cd["PARTITION"] != "default":
+			script_ind.write("#SBATCH --partition=%s\n" % cd["PARTITION"])
+
+		if cd["CORES"] != "default":
+			script_ind.write("#SBATCH --cores=%s\n" % cd["CORES"])
+
+		if cd["MEM PER CPU"] != "default":
+			script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
+
+		script_ind.write("")
+		script_ind.write(cmd_ind)
+		script_ind.write("")
+
+		script_ind.close()
+
+
+
+		
+
+
+
 
 	
 

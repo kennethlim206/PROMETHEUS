@@ -29,7 +29,7 @@ def task_reader(f):
 	return d
 
 # Reader for function constructors
-def constructor_reader(f):
+def function_reader(f):
 	file = open(f, "r")
 	lines = file.readlines()
 	file.close()

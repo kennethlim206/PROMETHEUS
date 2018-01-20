@@ -1,0 +1,84 @@
+
+•--------------------------------------------------------------------------------------------------•
+| •----------------------------------------------------------------------------------------------• |
+| |                                                                                              | |
+| |                                                                                              | |
+| |                                          - RIPLEY -                                          | |
+| |                                                                                              | |
+| |                                                                                              | |
+| •----------------------------------------------------------------------------------------------• |
+•--------------------------------------------------------------------------------------------------•
+
+CONSTRUCTOR SHEET
+V4.01, 01/08/18
+
+This function constructor sheet will be copied into your RED (RIPLEY Execution Directory).
+
+1. Lines beginning with <COMMAND> key will be read into the constructor reader.
+2. All command lines are required.
+3. Comments can be created using the # symbol. Commented text in the <COMMAND> key will not be read.
+
+•--------------------------------------------------------------------------------------------------•
+|                                                                                                  |
+|                                      - CONSTRUCTOR PARAMS -                                      |
+|                                                                                                  |
+•--------------------------------------------------------------------------------------------------•
+
+<FUNCTION NAME> TEST
+
+# Function to be run automatically after this one (constructor file name)
+<AUTO CALL> 
+
+# Dependecy category (MANUAL, AUTO)
+<DEPENDENCY> MANUAL
+
+# Sbatch parameters
+<TIME> 2:00:00
+<PARTITION> gc
+<CORES> default
+<MEM PER CPU> default
+
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - INPUT CMDs -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Use the variable <INPUT FILE> in the <SCRIPT COMMAND> below
+
+# Input files can be found in this directory (URL, RAW, INDEX, POST:[NAME])
+<INPUT DIR> POST:ALIGN
+
+# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX])
+<INPUT SUFFIX> BAM
+
+# Analyze one file per script command or all files in a single command (SINGLE/MULT)
+<INPUT MULT> SINGLE
+
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - OUTPUT CMD -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Output files can be found in this directory (RAW, INDEX, POST:[JOB NAME])
+<OUTPUT DIR> POST:TEST
+
+
+
+•--------------------------------------------------------------------------------------------------•
+|                                          - SCRIPT CMD -                                          |
+•--------------------------------------------------------------------------------------------------•
+
+# Any task sheet variables may be used below.
+# The shell scripts will be created in the output directory's RED.
+# Automatically stored variables for use here:
+# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>
+
+<SCRIPT COMMAND> {
+
+module load <SUBREAD MODULE>
+
+featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES TRIMMED>.fcounts.txt <INPUT FILES FULL>
+
+}

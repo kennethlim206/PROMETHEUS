@@ -24,14 +24,17 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> FEATURECOUNT
+<FUNCTION NAME> TEST
 
-# Dependecy category (MANUAL, AUTO:[JOB NAME])
+# Function to be run automatically after this one (constructor file name)
+<AUTO CALL> test_autoFunc.txt
+
+# Dependecy category (MANUAL, AUTO)
 <DEPENDENCY> MANUAL
 
 # Sbatch parameters
 <TIME> 2:00:00
-<PARTITION> default
+<PARTITION> gc
 <CORES> default
 <MEM PER CPU> default
 
@@ -59,7 +62,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 •--------------------------------------------------------------------------------------------------•
 
 # Output files can be found in this directory (RAW, INDEX, POST:[JOB NAME])
-<OUTPUT DIR> POST:FEATURECOUNT
+<OUTPUT DIR> POST:TEST
 
 
 

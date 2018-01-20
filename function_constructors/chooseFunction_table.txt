@@ -1,2 +1,2 @@
 # file_name	input_name	description
-test_constructor.txt	feature	subread featureCounts
+test_manualFunc.txt	feature	subread featureCounts

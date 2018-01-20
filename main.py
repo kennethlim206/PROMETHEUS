@@ -3,8 +3,7 @@ import sys
 import imp
 
 # Import processing modules
-readers = imp.load_source("readers", "./processing_scripts/readers.py")
-interpreter = imp.load_source("interpreter", "./processing_scripts/interpreter.py")
+manager = imp.load_source("manager", "./processing_scripts/job_manager.py")
 
 # User interface
 def main():
@@ -23,7 +22,7 @@ def main():
 
 	# Keeps user in the interface, until they choose to exit
 	task_exit = 0
-	constructor_exit = 0
+	function_exit = 0
 	
 	while not task_exit:
 
@@ -46,7 +45,7 @@ def main():
 		task_input = raw_input(">>> ")
 
 		if task_input == "exit":
-			sys.exit("Ending instance...")
+			sys.exit("Bye for now!")
 
 		task_input_path = "./tasks/%s" % task_input
 
@@ -56,17 +55,20 @@ def main():
 		else:
 			print "You selected the input file: %s\n" % task_input
 
-		while not constructor_exit:
+		while not function_exit:
 
 			# Input function from user
 			print " ------------------------------------------------------------------------------- "
-			print "|              STEP 2: PLEASE CHOOSE A FUNCTION TO PERFORM OR EXIT              |"
+			print "|                  STEP 2: PLEASE CHOOSE A FUNCTION(S) OR EXIT                  |"
 			print " ------------------------------------------------------------------------------- "
+			print " Note: Users can perform functions sequentially with the '->' symbol."
+			print " Example: download->align->feature"
+			print ""
 
-			# Display all functions from constructor table
-			constructor_files = open("./function_constructors/chooseFunction_table.txt", "r")
-			constructor_d = dict()
-			for line in constructor_files:
+			# Display all functions from function table
+			function_files = open("./function_constructors/chooseFunction_table.txt", "r")
+			function_d = dict()
+			for line in function_files:
 				if "#" not in line:
 					data = line.split("\t")
 					name = data[0]
@@ -75,70 +77,55 @@ def main():
 
 					print "%s = %s" % (input_name, description)
 
-					constructor_d[input_name] = name
+					function_d[input_name] = name
 
-			constructor_files.close()
+			function_files.close()
 
 			print "exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""
 
-			constructor_input = raw_input(">>> ")
+			function_input = raw_input(">>> ")
 
-			if constructor_input == "exit":
-				sys.exit("Ending instance...")
-
-			# Error for non-existing user input
-			if constructor_input not in constructor_d:
-				sys.exit("ERROR: Inputted function name does not exist.")
-			else:
-				print "You selected the function: %s\n" % constructor_input
-
-			constructor_input_path = "./function_constructors/%s" % constructor_d[constructor_input]
+			if function_input == "exit":
+				sys.exit("Bye for now!")
 
 
 
-			####### Start stuff #######
+			# Import relevant information to job manager
+			manager.run(task_input_path, function_input, function_d)
 
 
 
-			my_task = readers.task_reader(task_input_path)
-			my_constructor = readers.constructor_reader(constructor_input_path)
-			my_genome = readers.genome_reader("./genome_tables/%s" % my_task["REF TABLE"], my_task["REF ID"])
-
-			interpreter.interpret(my_constructor, my_task, my_genome)
-
-
-
-			####### End stuff #######
-
-
-
+			# Ask to repeat
 			print " ------------------------------------------------------------------------------- "
-			print "Are there other functions you wish to run on this dataset: %s ? (Y/N)\n" % task_input
-			more_constructor = raw_input(">>> ")
+			print "Are there other functions you wish to run on this dataset: %s ? (Y/N/exit)\n" % task_input
+			more_function = raw_input(">>> ")
 
-			if more_constructor == "N":
-				constructor_exit = 1
-			elif more_constructor == "Y":
+			if more_function == "N":
+				function_exit = 1
+			elif more_function == "Y":
 				task_exit = 0
-				constructor_exit = 0
+				function_exit = 0
+			elif more_function == "exit":
+				sys.exit("Bye for now!")
 			else:
 				sys.exit("Incorrect input. Exiting program...")
 
 		print " ------------------------------------------------------------------------------- "
-		print "Would you like to choose a new dataset? (Y/N)\n"
+		print "Would you like to choose a new dataset? (Y/N/exit)\n"
 		more_task = raw_input(">>> ")
 
 		if more_task == "N":
 			task_exit = 1
 		elif more_task == "Y":
-				task_exit = 0
-				constructor_exit = 0
+			task_exit = 0
+			function_exit = 0
+		elif more_task == "exit":
+			sys.exit("Bye for now!")
 		else:
 			sys.exit("Incorrect input. Exiting program...")
 
-	print ""
 	print "Bye for now!"
 
 if __name__ == '__main__':
