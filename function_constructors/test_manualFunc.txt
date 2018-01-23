@@ -29,8 +29,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> test_autoFunc.txt
 
-# Dependecy category (MANUAL, AUTO)
-<DEPENDENCY> MANUAL
+# Dependecy (afterok, afterany, etc.)
+<DEPENDENCY> afterok
 
 # Sbatch parameters
 <TIME> 2:00:00
@@ -49,10 +49,10 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Input files can be found in this directory (URL, RAW, INDEX, POST:[NAME])
 <INPUT DIR> POST:ALIGN
 
-# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX])
+# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
 <INPUT SUFFIX> BAM
 
-# Analyze one file per script command or all files in a single command (SINGLE/MULT)
+# Analyze one file per script command, pairs of files, or all files (SINGLE/PAIR/ALL)
 <INPUT MULT> SINGLE
 
 

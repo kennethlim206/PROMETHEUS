@@ -29,11 +29,11 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> 
 
-# Dependecy category (MANUAL, AUTO)
-<DEPENDENCY> MANUAL
+# Dependecy (afterok, afterany, etc.)
+<DEPENDENCY> afterok
 
 # Sbatch parameters
-<TIME> 2:00:00
+<TIME> 00:30:00
 <PARTITION> gc
 <CORES> default
 <MEM PER CPU> default
@@ -47,12 +47,12 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Use the variable <INPUT FILE> in the <SCRIPT COMMAND> below
 
 # Input files can be found in this directory (URL, RAW, INDEX, POST:[NAME])
-<INPUT DIR> POST:ALIGN
+<INPUT DIR> POST:TEST
 
-# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX])
-<INPUT SUFFIX> BAM
+# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
+<INPUT SUFFIX> NONE
 
-# Analyze one file per script command or all files in a single command (SINGLE/MULT)
+# Analyze one file per script command, pairs of files, or all files (SINGLE/PAIR/ALL)
 <INPUT MULT> SINGLE
 
 
@@ -77,8 +77,6 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 <SCRIPT COMMAND> {
 
-module load <SUBREAD MODULE>
-
-featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES TRIMMED>.fcounts.txt <INPUT FILES FULL>
+python ./processing_scripts/featureCount_parser.py <INPUT DIR>
 
 }

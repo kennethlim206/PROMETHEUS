@@ -5,33 +5,7 @@ import imp
 
 tools = imp.load_source("tools", "./processing_scripts/interpreter_tools.py")
 
-def interpret(cd, td, gd):
-
-	######################
-	###   DEPENDENCY   ###
-	######################
-
-	# Figuring out dependency. Manual = get dependency ID from user.
-	DEPENDENCY_ID = ""
-	if cd["DEPENDENCY"] == "MANUAL":
-		print "Is the job you selected dependent upon a previous job? (Y/N)\n"
-		answer = raw_input(">>> ")
-
-		if answer == "Y":
-			print "You entered Yes. Input job ID that the selected jobs will be dependent upon.\n"
-			DEPENDENCY_ID = raw_input(">>> ")
-			
-		elif answer == "N":
-			print "You entered No. Selected jobs will run independent of any previous jobs."
-		else:
-			sys.exit("ERROR: incorrect input to dependency query.")
-
-	# Figuring out dependency. Auto:[JOB NAME] = automatically creates dependency from function constructor.
-	elif "AUTO:" in cd["DEPENDENCY"]:
-		print "Justin: I will build auto-dependency later, 01/09."
-
-	else:
-		sys.exit("ERROR: incorrect input to <DEPENDENCY> cmd in function constructor sheet.")
+def interpret(td, gd, cd, dependency):
 
 
 
@@ -41,13 +15,13 @@ def interpret(cd, td, gd):
 
 	# INPUT PART 1: Convert INPUT DIR to directory containing input files
 	if cd["INPUT DIR"] == "URL":
-		print "Justin: I will build URL input later, 01/09."
+		cd["INPUT DIR"] = td["FTP COMMAND"]
 
 	elif cd["INPUT DIR"] == "RAW":
-		print "Justin: I will build RAW input later, 01/09."
+		cd["INPUT DIR"] = td["RAW DIR"]
 
 	elif cd["INPUT DIR"] == "INDEX":
-		print "Justin: I will build INDEX input later, 01/09."
+		cd["INPUT DIR"] = td["INDEX DIR"]
 
 	elif "POST:" in cd["INPUT DIR"]:
 
@@ -56,29 +30,46 @@ def interpret(cd, td, gd):
 		INPUT_DIR = "%s/%s" % (td["POST DIR"], POST_NAME)
 		cd["INPUT DIR"] = INPUT_DIR
 
-		if not os.path.isdir(INPUT_DIR):
-			sys.exit("ERROR: <INPUT DIR> in function constructor does not exist.")
 	else:
 		sys.exit("ERROR: Incorrect input into <INPUT DIR> command in function constructor.")
 
-	# INPUT PART 2: Retrieve INPUT DIR files based on suffix
-	if cd["INPUT SUFFIX"] == "FASTQ":
-		cd["INPUT FILES FULL"] = tools.get_FASTQs(cd["INPUT DIR"])
-	elif cd["INPUT SUFFIX"] == "BAM":
-		cd["INPUT FILES FULL"] = tools.get_BAMs(cd["INPUT DIR"])
-	elif "POST:" in cd["INPUT SUFFIX"]:
-		SUFFIX = cd["INPUT SUFFIX"]
-		SUFFIX = SUFFIX.split(":")[1]
-		cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)
-	else:
-		sys.exit("ERROR: Incorrect input into <INPUT SUFFIX> command in function constructor.")
+	# If INPUT DIR is a URL, then the command does not require further parsing.
+	if cd["INPUT DIR"] != "URL":
 
-	# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
-	cd["INPUT FILES TRIMMED"] = []
-	for file in cd["INPUT FILES FULL"]:
-		split_file = file.split("/")
-		trimmed_file = split_file[len(split_file)-1]
-		cd["INPUT FILES TRIMMED"].append(trimmed_file)
+		# Check if input directory is actual directory
+		if not os.path.isdir(cd["INPUT DIR"]):
+			sys.exit("ERROR: <INPUT DIR> in function constructor does not exist.")
+
+		# INPUT PART 2: Retrieve INPUT DIR files based on suffix
+		if cd["INPUT SUFFIX"] == "FASTQ":
+			cd["INPUT FILES FULL"] = tools.get_FASTQs(cd["INPUT DIR"])
+
+		elif cd["INPUT SUFFIX"] == "BAM":
+			cd["INPUT FILES FULL"] = tools.get_BAMs(cd["INPUT DIR"])
+
+		elif "POST:" in cd["INPUT SUFFIX"]:
+			SUFFIX = cd["INPUT SUFFIX"]
+			SUFFIX = SUFFIX.split(":")[1]
+			cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)
+
+		elif cd["INPUT SUFFIX"] == "NONE":
+			cd["INPUT FILES FULL"] = ["NULL"]
+
+		else:
+			sys.exit("ERROR: Incorrect input into <INPUT SUFFIX> command in function constructor.")
+
+		# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
+		cd["INPUT FILES TRIMMED"] = []
+		for file in cd["INPUT FILES FULL"]:
+			split_file = file.split("/")
+			trimmed_file = split_file[len(split_file)-1]
+
+			if td["SINGLE PAIR"] == "SE":
+				trimmed_file = trimmed_file.replace(td["PAIRED SUFFIX"], "_SE")
+			elif td["SINGLE PAIR"] == "PE":
+				trimmed_file = trimmed_file.replace(td["PAIRED SUFFIX"], "_PE")
+
+			cd["INPUT FILES TRIMMED"].append(trimmed_file)
 
 
 
@@ -133,7 +124,9 @@ def interpret(cd, td, gd):
 			if "<%s>" % var in cmd:
 				cmd = cmd.replace("<%s>" % var, cd[var])
 
-	# Write script
+	# Write and run script
+	return_string = ""
+
 	for i in range(0, len(cd["INPUT FILES FULL"])):
 		cmd_ind = cmd
 		input_full_ind = cd["INPUT FILES FULL"][i]
@@ -142,8 +135,10 @@ def interpret(cd, td, gd):
 		cmd_ind = cmd_ind.replace("<INPUT FILES FULL>", input_full_ind)
 		cmd_ind = cmd_ind.replace("<INPUT FILES TRIMMED>", input_trim_ind)
 
+		script_ind_path = "%s/%s.sh" % (record["scripts"], input_trim_ind)
+
 		# Place in RED of OUTPUT DIR
-		script_ind = open("%s/%s.sh" % (record["scripts"], input_trim_ind), "w")
+		script_ind = open(script_ind_path, "w")
 
 		script_ind.write("#!/bin/bash -l\n\n")
 
@@ -163,11 +158,42 @@ def interpret(cd, td, gd):
 		if cd["MEM PER CPU"] != "default":
 			script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
 
+
+
+		######################
+		###   DEPENDENCY   ###
+		######################
+
+		if dependency != "":
+			script_ind.write("#SBATCH --dependency=%s:%s" % (cd["DEPENDENCY"], dependency))
+
+
+
 		script_ind.write("")
 		script_ind.write(cmd_ind)
 		script_ind.write("")
 
 		script_ind.close()
+
+		status = 0
+		ID = "Submitting job as 1738"
+
+		if len(sys.argv) == 1:
+			print "Submitting %s ..." % cd["FUNCTION NAME"]
+			status, ID = commands.getstatusoutput("sbatch %s" % script_ind_path)
+
+		if status == 0:
+
+			ID_split = ID.split(" ")
+			ID = int(ID_split[3])
+			print "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
+			
+		else:
+			sys.exit("ERROR: Sbatch submission error: %s" % ID)
+
+		return_string += "%s:" % ID
+
+	return return_string[:len(return_string)-1]
 
 
 
