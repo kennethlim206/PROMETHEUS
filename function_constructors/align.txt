@@ -24,19 +24,19 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> TEST
+<FUNCTION NAME> ALIGN
 
 # Function to be run automatically after this one (constructor file name)
-<AUTO CALL> test_autoFunc.txt
+<AUTO CALL> 
 
 # Dependecy (afterok, afterany, etc.)
 <DEPENDENCY> afterok
 
 # Sbatch parameters
-<TIME> 2:00:00
-<PARTITION> gc
-<CORES> default
-<MEM PER CPU> default
+<TIME> 24:00:00
+<PARTITION> gc128
+<CORES> 10
+<MEM PER CPU> 8G
 
 
 
@@ -46,13 +46,13 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 # Use the variable <INPUT FILE> in the <SCRIPT COMMAND> below
 
-# Input files can be found in this directory (URL, RAW, INDEX, POST:[NAME])
-<INPUT DIR> POST:ALIGN
+# Input files can be found in this directory (URL, RAW, POST:[NAME])
+<INPUT DIR> RAW
 
 # Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
-<INPUT SUFFIX> BAM
+<INPUT SUFFIX> FASTQ
 
-# Analyze one file per script command, pairs of files, or all files (SINGLE/PAIR/ALL)
+# Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
 <INPUT MULT> SINGLE
 
 
@@ -62,7 +62,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 •--------------------------------------------------------------------------------------------------•
 
 # Output files can be found in this directory (RAW, INDEX, POST:[JOB NAME])
-<OUTPUT DIR> POST:TEST
+<OUTPUT DIR> POST:ALIGN
 
 
 
@@ -77,8 +77,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 <SCRIPT COMMAND> {
 
-module load <SUBREAD MODULE>
+module load <STAR MODULE>
 
-featureCounts -g gene_id <FEATURECOUNT PARAMS> -a <USE ANNO> -o <OUTPUT DIR>/<INPUT FILES TRIMMED>.fcounts.txt <INPUT FILES FULL>
+STAR --genomeDir <INDEX DIR> --runThreadN <RUN THREAD> --readFilesIn <INPUT FILES FULL> --outFileNamePrefix <INPUT FILES TRIMMED> --outSAMtype BAM SortedByCoordinate --outWigType wiggle --quantMode TranscriptomeSAM GeneCounts --outReadsUnmapped Fastx <ZIPPED> <ALIGN PARAMS>
 
 }

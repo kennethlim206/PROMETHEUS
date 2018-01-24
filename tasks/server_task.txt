@@ -52,7 +52,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L003_R1_001
+<FASTQ SUFFIX> _L003_R1_001.fastq.gz
 
 
 
@@ -99,7 +99,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 <INDEX DIR> /share/nordlab/users/kjulim/STAR_INDEX/Mouse_ensembl_GRCm38_100bp_CUSTOM
 
 # STAR parameter, number of available cores on server (cabernet = 8). (*)
-<READ THREAD> 8
+<RUN THREAD> 8
 
 # STAR parameter, read length of sample fastq -1. (*)
 <SJBD OVERHANG> 99
@@ -110,9 +110,9 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •---------------------------------------- ALIGN PARAMETERS ----------------------------------------•
 
 # Full file path to STAR align output directory. (*)
-<POST DIR> /share/nordlab/users/kjulim/RSCR00_L3_processed
+<POST DIR> /share/nordlab/users/kjulim/TEST_DATA
 
-# Whether sample fastq's are compressed or not (.gz, .bzip2, none). (*)
+# Whether sample fastq's are compressed or not (.gz, .bzip2).
 <ZIPPED> .gz
 
 # Other indexing parameters specific to this analysis.

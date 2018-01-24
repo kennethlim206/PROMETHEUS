@@ -37,13 +37,13 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •-------------------------------------------- DOWNLOAD --------------------------------------------•
 
 # The URL given by SLIMS for downloading data via FTP/rsync request.
-<FTP COMMAND> # http://slimsdata.genomecenter.ucdavis.edu/Data/xo8evn0v4/UnalignedL7/Project_ANIZ_L3_H1189P_Zdilar/
+<FTP COMMAND> 
 
 # Single or multiple SRR IDs (comma delimited, if multiple) for download via fastq-dump.
 <SRR IDs> 
 
 # The directory where fastq files are downloaded. (*) 
-<RAW DATA DIR> /share/nordlab/rawdata/Project_ANIZ_L3_H1189P_Zdilar
+<RAW DATA DIR> /Users/kennethlim/Desktop/TEST_DIR/raw_data
 
 •----------------------------------------- SAMPLE ID INFO -----------------------------------------•
 
@@ -52,7 +52,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L001
+<FASTQ SUFFIX> _L001.fastq.gz
 
 
 
@@ -99,7 +99,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 <INDEX DIR> /share/nordlab/users/kjulim/STAR_INDEX/Mouse_ensembl_GRCm38_100bp_CUSTOM
 
 # STAR parameter, number of available cores on server (cabernet = 8). (*)
-<READ THREAD> 8
+<RUN THREAD> 8
 
 # STAR parameter, read length of sample fastq -1. (*)
 <SJBD OVERHANG> 99
@@ -112,7 +112,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 # Full file path to STAR align output directory. (*)
 <POST DIR> /Users/kennethlim/Desktop/TEST_DIR
 
-# Whether sample fastq's are compressed or not (.gz, .bzip2, none). (*)
+# Whether sample fastq's are compressed or not (.gz, .bzip2).
 <ZIPPED> .gz
 
 # Other indexing parameters specific to this analysis.

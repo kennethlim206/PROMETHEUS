@@ -14,7 +14,7 @@ def get_other(directory, suffix):
 	else:
 		sys.exit("ERROR: %s" % sdout)
 
-def get_FQs(directory):
+def get_FASTQs(directory):
 	status, sdout = commands.getstatusoutput("find %s -not -path '*/\.*' -type f -name '*.fastq*'" % directory)
 	if status == 0:
 		return_list = sorted(sdout.split("\n"))
@@ -46,6 +46,7 @@ def get_BAMs(directory):
 def populate(directory, task, function):
 
 	make_d = dict()
+	make_d["root directory"] = directory.rsplit("/", 1)[0]
 	make_d["directory"] = directory
 	make_d["red"] = "%s/RED" % directory
 	make_d["output"] = "%s/sbatch_output" % make_d["red"]
@@ -53,6 +54,8 @@ def populate(directory, task, function):
 	make_d["scripts"] = "%s/sbatch_scripts" % make_d["red"]
 	make_d["user"] = "%s/user_input" % make_d["red"]
 
+	if not os.path.isdir(make_d["root directory"]):
+			os.popen("mkdir %s" % make_d["root directory"])
 	if not os.path.isdir(make_d["directory"]):
 			os.popen("mkdir %s" % make_d["directory"])
 	if not os.path.isdir(make_d["red"]):
@@ -64,6 +67,6 @@ def populate(directory, task, function):
 
 	os.popen("cp -r %s %s" % (task, make_d["user"]))
 	os.popen("cp -r %s %s" % (function, make_d["user"]))
-	os.popen("cp -r ./processing_scripts/find.py %s" % make_d["red"])
+	# os.popen("cp -r ./processing_scripts/find.py %s" % make_d["red"])
 
 	return make_d

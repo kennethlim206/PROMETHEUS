@@ -70,6 +70,7 @@ def main():
 			function_d = dict()
 			for line in function_files:
 				if "#" not in line:
+					line = line.replace("\n", "")
 					data = line.split("\t")
 					name = data[0]
 					input_name = data[1]
@@ -81,6 +82,7 @@ def main():
 
 			function_files.close()
 
+			print ""
 			print "exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""

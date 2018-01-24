@@ -18,7 +18,7 @@ def interpret(td, gd, cd, dependency):
 		cd["INPUT DIR"] = td["FTP COMMAND"]
 
 	elif cd["INPUT DIR"] == "RAW":
-		cd["INPUT DIR"] = td["RAW DIR"]
+		cd["INPUT DIR"] = td["RAW DATA DIR"]
 
 	elif cd["INPUT DIR"] == "INDEX":
 		cd["INPUT DIR"] = td["INDEX DIR"]
@@ -38,7 +38,7 @@ def interpret(td, gd, cd, dependency):
 
 		# Check if input directory is actual directory
 		if not os.path.isdir(cd["INPUT DIR"]):
-			sys.exit("ERROR: <INPUT DIR> in function constructor does not exist.")
+			sys.exit("ERROR: task sheet variable associated with <INPUT DIR> does not exist: %s" % cd["INPUT DIR"])
 
 		# INPUT PART 2: Retrieve INPUT DIR files based on suffix
 		if cd["INPUT SUFFIX"] == "FASTQ":
@@ -53,7 +53,7 @@ def interpret(td, gd, cd, dependency):
 			cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)
 
 		elif cd["INPUT SUFFIX"] == "NONE":
-			cd["INPUT FILES FULL"] = ["NULL"]
+			cd["INPUT FILES FULL"] = [cd["FUNCTION NAME"]]
 
 		else:
 			sys.exit("ERROR: Incorrect input into <INPUT SUFFIX> command in function constructor.")
@@ -61,14 +61,7 @@ def interpret(td, gd, cd, dependency):
 		# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
 		cd["INPUT FILES TRIMMED"] = []
 		for file in cd["INPUT FILES FULL"]:
-			split_file = file.split("/")
-			trimmed_file = split_file[len(split_file)-1]
-
-			if td["SINGLE PAIR"] == "SE":
-				trimmed_file = trimmed_file.replace(td["PAIRED SUFFIX"], "_SE")
-			elif td["SINGLE PAIR"] == "PE":
-				trimmed_file = trimmed_file.replace(td["PAIRED SUFFIX"], "_PE")
-
+			trimmed_file = file.rsplit("/", 1)[1]
 			cd["INPUT FILES TRIMMED"].append(trimmed_file)
 
 
@@ -107,9 +100,43 @@ def interpret(td, gd, cd, dependency):
 
 
 
+	####################################
+	###   ALIGNING PAIRED-END DATA   ###
+	####################################
+
+	if cd["FUNCTION NAME"] == "ALIGN":
+		for i in range(0,len(cd["INPUT FILES TRIMMED"])):
+			if td["SINGLE PAIR"] == "SE":
+				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
+
+			elif td["SINGLE PAIR"] == "PE":
+				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
+
+			else:
+				sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
+
+
+
+	#######################
+	###   ZIPPED DATA   ###
+	#######################
+
+	if td["ZIPPED"] == ".gz":
+		td["ZIPPED"] = "--readFilesCommand gunzip -c"
+	elif td["ZIPPED"] == ".bzip2":
+		td["ZIPPED"] = "--readFilesCommand bunzip2 -c"
+	elif td["ZIPPED"] == "":
+		td["ZIPPED"] = ""
+	else:
+		sys.exit("ERROR: Incorrect input into <ZIPPED> task variable.")
+
+
+
 	############################
 	###   GENERATE SCRIPTS   ###
 	############################
+
+	test_num = 1738
 
 	# Add task variables to script
 	cmd = cd["SCRIPT COMMAND"]
@@ -145,7 +172,7 @@ def interpret(td, gd, cd, dependency):
 		# Required for sbatch script
 		script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
 		script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
-		script_ind.write("#SBATCH --output=%s/%s,out\n" % (record["output"], input_trim_ind))
+		script_ind.write("#SBATCH --output=%s/%s.out\n" % (record["output"], input_trim_ind))
 		script_ind.write("#SBATCH --error=%s/%s.err\n" % (record["error"], input_trim_ind))
 
 		# Optional for sbatch script
@@ -153,19 +180,10 @@ def interpret(td, gd, cd, dependency):
 			script_ind.write("#SBATCH --partition=%s\n" % cd["PARTITION"])
 
 		if cd["CORES"] != "default":
-			script_ind.write("#SBATCH --cores=%s\n" % cd["CORES"])
+			script_ind.write("#SBATCH --cpus-per-task=%s\n" % cd["CORES"])
 
 		if cd["MEM PER CPU"] != "default":
 			script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
-
-
-
-		######################
-		###   DEPENDENCY   ###
-		######################
-
-		if dependency != "":
-			script_ind.write("#SBATCH --dependency=%s:%s" % (cd["DEPENDENCY"], dependency))
 
 
 
@@ -175,40 +193,53 @@ def interpret(td, gd, cd, dependency):
 
 		script_ind.close()
 
+
+
+
+		#########################
+		###   SUBMIT SCRIPT   ###
+		#########################
+
+		submission_record = open("%s/submission_record.txt" % record["red"], "a")
+
+		print "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
+		submit_cmd = "sbatch %s" % (script_ind_path)
+
+		# Add dependency outside of script
+		if dependency != "":
+			submit_cmd = "sbatch --dependency=%s:%s %s" % (cd["DEPENDENCY"], dependency, script_ind_path)
+
+		# Test case
 		status = 0
-		ID = "Submitting job as 1738"
+		ID = "Submitting job as %i" % test_num
+		test_num += 1
 
+		# Real case
 		if len(sys.argv) == 1:
-			print "Submitting %s ..." % cd["FUNCTION NAME"]
-			status, ID = commands.getstatusoutput("sbatch %s" % script_ind_path)
+			status, ID = commands.getstatusoutput(submit_cmd)
 
+		# Analyze result of sbatch submission
 		if status == 0:
 
 			ID_split = ID.split(" ")
 			ID = int(ID_split[3])
-			print "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
+
+			return_message = "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
+
+			# Add dependency to return message
+			if dependency != "":
+				return_message += " with dependency %s" % dependency
+
+			print return_message
 			
 		else:
 			sys.exit("ERROR: Sbatch submission error: %s" % ID)
 
+		submission_record.write("%s\n" % submit_cmd)
+		submission_record.write("%s\n" % return_message)
 		return_string += "%s:" % ID
 
+	submission_record.write("\n")
+	submission_record.close()
+	
 	return return_string[:len(return_string)-1]
-
-
-
-		
-
-
-
-
-	
-
-	
-
-	
-
-
-
-
-
