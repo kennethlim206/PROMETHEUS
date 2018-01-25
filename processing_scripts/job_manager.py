@@ -1,73 +1,59 @@
 import os
 import sys
 import imp
-
-# Import processing modules
-readers = imp.load_source("readers", "./processing_scripts/readers.py")
-interpreter = imp.load_source("interpreter", "./processing_scripts/interpreter.py")
+import commands
+import time
 
 # Figures out the order for function requests
-def run(task_path, function_names, function_options):
+def run(task_path, function_path_list):
 
-	# Load task info from reader (error checks are in main.py)
-	my_task = readers.task_reader(task_path)
-	my_genome = readers.genome_reader("./genome_tables/%s" % my_task["REF TABLE"], my_task["REF ID"])
+	# Get auto call functions in order as well
+	all_function_list = []
+	for path in function_path_list:
+		all_function_list.append(path)
 
+		auto_call = commands.getoutput("grep '<AUTO CALL>' %s" % path)
+		auto_call = auto_call.split("<AUTO CALL>")[1]
+		auto_call = auto_call.replace(" ", "")
+		auto_call = auto_call.replace("\n", "")
 
+		if auto_call != "":
+			auto_path = "./function_constructors/%s" % auto_call
 
-	# Parse and load function info
-	function_queue = []
-	function_names_list = function_names.split("->")
+			# Error for non-existing autocall input
+			if not os.path.isfile(auto_path):
+				sys.exit(" ERROR: Incorrect <AUTO CALL> file name. Please check function constructor: %s" % path.rsplit("/", 1)[1])
 
-	print "You selected the following function(s):"
-
-	for name in function_names_list:
-		# Error for non-existing user input
-		if name not in function_options:
-			sys.exit("ERROR: Inputted function name does not exist: %s" % name)
-
-		function_input_path = "./function_constructors/%s" % function_options[name]
-
-		# Error for non-existing user input
-		if not os.path.isfile(function_input_path):
-			sys.exit("ERROR: Incorrect function path. Please check the input path in chooseFunction_table.txt")
-
-		print name
-
-		my_function = readers.function_reader(function_input_path)
-		function_queue.append(my_function)
-
-		# ADD AUTO CALLS
-		if my_function["AUTO CALL"] != "":
-
-			function_input_path = "./function_constructors/%s" % my_function["AUTO CALL"]
-
-			# Error for non-existing user input
-			if not os.path.isfile(function_input_path):
-				sys.exit("ERROR: Incorrect input into <AUTO CALL> variable in function constructor.")
-
-			print "AUTO CALLED: %s" % my_function["AUTO CALL"]
-
-			called_function = readers.function_reader(function_input_path)
-			function_queue.append(called_function)
+			all_function_list.append(auto_path)
 
 		
 
 	print " ------------------------------------------------------------------------------- "
-	print "Constructing your request ..."
+	print " Constructing your request ..."
 	print ""
 	
 	# Interpret functions
-	dependency = ""
-	for my_function in function_queue:
+	for i in range(0,len(all_function_list)):
 
-		# Dictionaries are mutable in python so passing an instance into a function will alter the original.
-		# Making a copy of the original and altering the copy solves this problem.
-		my_task_copy = dict(my_task)
-		my_genome_copy = dict(my_genome)
-		my_function_copy = dict(my_function)
+		cmd = "sbatch "
 
-		dependency = interpreter.interpret(my_task_copy, my_genome_copy, my_function_copy, dependency)
+		# Grab dependency numbers from submitter output
+		if i > 0:
+			dependency = commands.getoutput("grep '<DEPENDENCY>' ./processing_scripts/temp/submitter.out")
+			dependency = dependency.replace("<DEPENDENCY> ", "")
+			dependency = dependency.replace("\n", "")
+
+			cmd += dependency
+
+		cmd += " %s %s" % (task_path, all_function_list[i])
+
+		# Feed job dependency through
+		# Make this section dependent submitters
+
+
+
+
+		
 
 
 

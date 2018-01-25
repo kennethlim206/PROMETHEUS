@@ -1,3 +1,0 @@
-# file_name	input_name	description
-align.txt	align	STAR align
-featureCount.txt	feature	subread featureCounts

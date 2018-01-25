@@ -3,9 +3,16 @@ import sys
 import commands
 import imp
 
-tools = imp.load_source("tools", "./processing_scripts/interpreter_tools.py")
+def main():
 
-def interpret(td, gd, cd, dependency):
+	# Import processing modules
+	readers = imp.load_source("readers", "./processing_scripts/readers.py")
+	tools = imp.load_source("tools", "./processing_scripts/interpreter_tools.py")
+
+	# Load task info from reader
+	td = readers.task_reader(sys.argv[1])
+	cd = readers.function_reader(sys.argv[2])
+	gd = readers.genome_reader("./genome_tables/%s" % td["REF TABLE"], td["REF ID"])
 
 
 
@@ -203,19 +210,13 @@ def interpret(td, gd, cd, dependency):
 		submission_record = open("%s/submission_record.txt" % record["red"], "a")
 
 		print "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
-		submit_cmd = "sbatch %s" % (script_ind_path)
-
-		# Add dependency outside of script
-		if dependency != "":
-			submit_cmd = "sbatch --dependency=%s:%s %s" % (cd["DEPENDENCY"], dependency, script_ind_path)
-
-		# Test case
+		submit_cmd = "sbatch %s" % script_ind_path
+		
 		status = 0
 		ID = "Submitting job as %i" % test_num
 		test_num += 1
 
-		# Real case
-		if len(sys.argv) == 1:
+		if len(sys.argv) == 3:
 			status, ID = commands.getstatusoutput(submit_cmd)
 
 		# Analyze result of sbatch submission
@@ -225,10 +226,6 @@ def interpret(td, gd, cd, dependency):
 			ID = int(ID_split[3])
 
 			return_message = "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
-
-			# Add dependency to return message
-			if dependency != "":
-				return_message += " with dependency %s" % dependency
 
 			print return_message
 			
@@ -242,4 +239,7 @@ def interpret(td, gd, cd, dependency):
 	submission_record.write("\n")
 	submission_record.close()
 	
-	return return_string[:len(return_string)-1]
+	print "<DEPENDENCY> --dependency=%s:%s" % (cd["DEPENDENCY"], return_string[:len(return_string)-1])
+
+if __name__ == '__main__':
+	main()

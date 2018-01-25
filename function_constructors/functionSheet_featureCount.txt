@@ -27,7 +27,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 <FUNCTION NAME> TEST
 
 # Function to be run automatically after this one (constructor file name)
-<AUTO CALL> featureCount_parser.txt
+<AUTO CALL> functionSheet_featureCount_parser.txt
 
 # Dependecy (afterok, afterany, etc.)
 <DEPENDENCY> afterok

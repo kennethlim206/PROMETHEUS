@@ -11,7 +11,7 @@ def get_names(directory):
 		if name[0] != "." and "summary" not in name and ".txt" in name:
 			return_list.append(name)
 
-	return return_list
+	return sort(return_list)
 
 def parse(d):
 	# inputted directory with feature counts files
