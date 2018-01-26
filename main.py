@@ -33,11 +33,16 @@ def main():
 
 		# Display all task options
 		input_files = os.listdir("./tasks")
-		input_files.sort()
+		input_list = []
+		for file in input_files:
+			if file[0] != ".":
+				input_list.append(file)
+				
+		input_list.sort()
 		print " ID   Task Sheet"
 		print " ----------------"
-		for i in range(0, len(input_files)):
-			print " %i = %s" % (i, input_files[i])
+		for i in range(0, len(input_list)):
+			print " %i = %s" % (i, input_list[i])
 
 		print ""
 		print " exit"
@@ -58,16 +63,16 @@ def main():
 		task_input = int(task_input)
 
 		# Error for numeric input not in range
-		if task_input >= len(input_files):
+		if task_input >= len(input_list):
 			sys.exit(" ERROR: Input is not listed.")
 
-		task_input_path = "./tasks/%s" % input_files[task_input]
+		task_input_path = "./tasks/%s" % input_list[task_input]
 
 		# Error for non-existing user input
 		if not os.path.isfile(task_input_path):
 			sys.exit(" ERROR: Inputted task name does not exist.")
 		else:
-			print " You selected the input file: %s\n" % input_files[task_input]
+			print " You selected the input file: %s\n" % input_list[task_input]
 
 		while not function_exit:
 
@@ -80,7 +85,7 @@ def main():
 			print ""
 
 			# Display all functions from function table
-			function_files = open("./function_constructors/function_paths.txt", "r")
+			function_files = open("./function_constructors/paths.txt", "r")
 			function_options = dict()
 			for line in function_files:
 				if "#" not in line:
@@ -124,20 +129,22 @@ def main():
 
 				# Error for non-existing user input
 				if not os.path.isfile(function_input_path):
-					sys.exit(" ERROR: Incorrect function path. Please check the input path in function_paths.txt")
+					sys.exit(" ERROR: Incorrect function path. Please check the input path in ./function_constructors/paths.txt")
 
 				function_path_list.append(function_input_path)
 
 				print " %s" % name
 
 			# Import relevant information to job manager
+			file = open("./processing_scripts/temp/dependency.txt", "w")
+			file.close()
 			manager.run(task_input_path, function_path_list)
 
 
 
 			# Ask to repeat
 			print " ------------------------------------------------------------------------------- "
-			print " Are there other functions you wish to run on your chosen dataset: %s ? (Y/N/exit)\n" % input_files[task_input]
+			print " Are there other functions you wish to run on your chosen dataset: %s ? (Y/N/exit)\n" % input_list[task_input]
 			more_function = raw_input(" >>> ")
 
 			if more_function == "N":

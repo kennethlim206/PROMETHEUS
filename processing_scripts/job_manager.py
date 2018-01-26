@@ -26,6 +26,8 @@ def run(task_path, function_path_list):
 
 			all_function_list.append(auto_path)
 
+			print " + AUTO CALLED: %s" % auto_call
+
 		
 
 	print " ------------------------------------------------------------------------------- "
@@ -33,32 +35,30 @@ def run(task_path, function_path_list):
 	print ""
 	
 	# Interpret functions
+	submitter_dependency = ""
 	for i in range(0,len(all_function_list)):
+		cmd = "srun --time=00:01:00"
 
-		cmd = "sbatch "
+		# if i > 0:
+			# Grab dependency from previous submission
+			# cmd += " --dependency=afterok:%s" % submitter_dependency
 
-		# Grab dependency numbers from submitter output
-		if i > 0:
-			dependency = commands.getoutput("grep '<DEPENDENCY>' ./processing_scripts/temp/submitter.out")
-			dependency = dependency.replace("<DEPENDENCY> ", "")
-			dependency = dependency.replace("\n", "")
+		cmd += " ./processing_scripts/root_submitter.sh %s %s" % (task_path, all_function_list[i])
 
-			cmd += dependency
+		print " Submitting function %i/%i - %s" % (i+1, len(all_function_list), all_function_list[i].rsplit("/", 1)[1])
+		print " %s" % cmd
+		status, ID = commands.getstatusoutput(cmd)
+		time.sleep(10)
+		if status == 0:
+			print "++++++"
+			print ID
+			print "++++++"
+			ID = ID.rsplit("\n", 1)[1]
+			ID_split = ID.split(" ")
+			ID = int(ID_split[3])
+			print " Function submitted as %i" % (ID)
+		else:
+			sys.exit(" ERROR: sbatch error:\n%s" % ID)
 
-		cmd += " %s %s" % (task_path, all_function_list[i])
+		submitter_dependency = str(ID)
 
-		# Feed job dependency through
-		# Make this section dependent submitters
-
-
-
-
-		
-
-
-
-	
-
-	
-
-	

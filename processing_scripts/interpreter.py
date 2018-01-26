@@ -210,6 +210,7 @@ def main():
 		submission_record = open("%s/submission_record.txt" % record["red"], "a")
 
 		print "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
+
 		submit_cmd = "sbatch %s" % script_ind_path
 		
 		status = 0
@@ -239,7 +240,9 @@ def main():
 	submission_record.write("\n")
 	submission_record.close()
 	
-	print "<DEPENDENCY> --dependency=%s:%s" % (cd["DEPENDENCY"], return_string[:len(return_string)-1])
+	temp_dep = open("./processing_scripts/temp/dependency.txt", "w")
+	temp_dep.write("<DEPENDENCY> %s" % return_string[:len(return_string)-1])
+	temp_dep.close()
 
 if __name__ == '__main__':
 	main()
