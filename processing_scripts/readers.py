@@ -1,7 +1,7 @@
 import os
 import sys
 
-# Reader for tasks and constructors
+# Reader for tasks
 def task_reader(f):
 	file = open(f, "r")
 	lines = file.readlines()
@@ -106,7 +106,3 @@ def genome_reader(f, ID):
 
 				d[cmd_name] = cmd_val
 	return d
-
-
-
-

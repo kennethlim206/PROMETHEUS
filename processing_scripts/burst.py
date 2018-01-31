@@ -7,7 +7,7 @@ def main():
 
 	# Import processing modules
 	readers = imp.load_source("readers", "./processing_scripts/readers.py")
-	tools = imp.load_source("tools", "./processing_scripts/interpreter_tools.py")
+	tools = imp.load_source("tools", "./processing_scripts/burst_tools.py")
 
 	# Load task info from reader
 	td = readers.task_reader(sys.argv[1])
@@ -32,7 +32,7 @@ def main():
 
 	elif "POST:" in cd["INPUT DIR"]:
 
-		# Find correct input directory 
+		# Find correct input directory
 		POST_NAME = cd["INPUT DIR"].split("POST:")[1]
 		INPUT_DIR = "%s/%s" % (td["POST DIR"], POST_NAME)
 		cd["INPUT DIR"] = INPUT_DIR
@@ -209,7 +209,7 @@ def main():
 
 		submission_record = open("%s/submission_record.txt" % record["red"], "a")
 
-		print "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
+		pre_submit_print = "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
 
 		submit_cmd = "sbatch %s" % script_ind_path
 		
@@ -227,22 +227,21 @@ def main():
 			ID = int(ID_split[3])
 
 			return_message = "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
-
-			print return_message
 			
 		else:
-			sys.exit("ERROR: Sbatch submission error: %s" % ID)
+			sys.exit("ERROR:\n%s" % ID)
 
+		# Output job submission statements
+		submission_record.write("%s\n" % pre_submit_print)
 		submission_record.write("%s\n" % submit_cmd)
 		submission_record.write("%s\n" % return_message)
+
 		return_string += "%s:" % ID
 
 	submission_record.write("\n")
 	submission_record.close()
 	
-	temp_dep = open("./processing_scripts/temp/dependency.txt", "w")
-	temp_dep.write("<DEPENDENCY> %s" % return_string[:len(return_string)-1])
-	temp_dep.close()
+	print return_string[:-1]
 
 if __name__ == '__main__':
 	main()

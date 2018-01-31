@@ -2,6 +2,7 @@ import os
 import sys
 import commands
 
+# Get files from a path based on a user defined suffix
 def get_other(directory, suffix):
 	status, sdout = commands.getstatusoutput("find %s -not -path '*/\.*' -type f -name '*%s*'" % (directory, suffix))
 	if status == 0:
@@ -14,6 +15,7 @@ def get_other(directory, suffix):
 	else:
 		sys.exit("ERROR: %s" % sdout)
 
+# Get .fastq files from a path
 def get_FASTQs(directory):
 	status, sdout = commands.getstatusoutput("find %s -not -path '*/\.*' -type f -name '*.fastq*'" % directory)
 	if status == 0:
@@ -26,6 +28,7 @@ def get_FASTQs(directory):
 	else:
 		sys.exit("ERROR: %s" % sdout)
 
+# Get .bam files from a path
 def get_BAMs(directory):
 	status, sdout = commands.getstatusoutput("find %s -not -path '*/\.*' -type f -name '*.sortedByCoord.out.bam'" % directory)
 	if status == 0:
@@ -43,6 +46,7 @@ def get_BAMs(directory):
 	else:
 		sys.exit("ERROR: %s" % sdout)
 
+# Populate path with Riply Execution Directory 
 def populate(directory, task, function):
 
 	make_d = dict()
@@ -67,6 +71,5 @@ def populate(directory, task, function):
 
 	os.popen("cp -r %s %s" % (task, make_d["user"]))
 	os.popen("cp -r %s %s" % (function, make_d["user"]))
-	# os.popen("cp -r ./processing_scripts/find.py %s" % make_d["red"])
 
 	return make_d

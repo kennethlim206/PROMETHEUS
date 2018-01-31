@@ -1,12 +1,11 @@
 import os
 import sys
-import imp
-
-# Import processing modules
-manager = imp.load_source("manager", "./processing_scripts/job_manager.py")
+import commands
 
 # User interface
 def main():
+
+	os.popen("chmod +x ./processing_scripts/*.sh")
 
 	print "\n"
 	print "*********************************************************************************  "
@@ -135,10 +134,45 @@ def main():
 
 				print " %s" % name
 
-			# Import relevant information to job manager
-			file = open("./processing_scripts/temp/dependency.txt", "w")
-			file.close()
-			manager.run(task_input_path, function_path_list)
+				auto_call = commands.getoutput("grep '<AUTO CALL>' %s" % function_input_path)
+				auto_call = auto_call.split("<AUTO CALL>")[1]
+				auto_call = auto_call.replace(" ", "")
+				auto_call = auto_call.replace("\n", "")
+
+				if auto_call != "":
+					auto_path = "./function_constructors/%s" % auto_call
+
+					# Error for non-existing autocall input
+					if not os.path.isfile(auto_path):
+						sys.exit(" ERROR: Incorrect <AUTO CALL> file name. Please check function constructor: %s" % path.rsplit("/", 1)[1])
+
+					function_path_list.append(auto_path)
+
+					print " + AUTO CALLED: %s" % auto_call
+			
+			# Generate string input to give to queen
+			function_string = ""
+			for path in function_path_list:
+				function_string += "%s+" % path
+
+				
+
+			print ""
+			print " ------------------------------------------------------------------------------- "
+			print " Constructing queen module ..."
+			print ""
+
+
+
+			# Sumbit QUEEN module
+			cmd = "sbatch ./processing_scripts/queen_submitter.sh %s %s" % (task_input_path, function_string[:-1])
+			status, ID = commands.getstatusoutput(cmd)
+			if status == 0:
+				ID_split = ID.split(" ")
+				ID = int(ID_split[3])
+				print " Your queen module has been submitted: %i" % ID
+			else:
+				sys.exit(" ERROR:\n%s" % ID)
 
 
 
