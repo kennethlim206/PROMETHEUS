@@ -5,14 +5,17 @@ import imp
 
 def main():
 
+	WORKING_DIR = os.getcwd()
+
 	# Import processing modules
-	readers = imp.load_source("readers", "./processing_scripts/readers.py")
-	tools = imp.load_source("tools", "./processing_scripts/burst_tools.py")
+	tools = imp.load_source("tools", "%s/processing_scripts/burst_tools.py" % WORKING_DIR)
 
 	# Load task info from reader
-	td = readers.task_reader(sys.argv[1])
-	cd = readers.function_reader(sys.argv[2])
-	gd = readers.genome_reader("./genome_tables/%s" % td["REF TABLE"], td["REF ID"])
+	td = tools.task_reader(sys.argv[1])
+	cd = tools.function_reader(sys.argv[2])
+	gd = tools.genome_reader("%s/genome_tables/%s" % (WORKING_DIR, td["REF TABLE"]), td["REF ID"])
+
+	td["WORKING DIR"] = WORKING_DIR
 
 
 
@@ -48,28 +51,31 @@ def main():
 			sys.exit("ERROR: task sheet variable associated with <INPUT DIR> does not exist: %s" % cd["INPUT DIR"])
 
 		# INPUT PART 2: Retrieve INPUT DIR files based on suffix
-		if cd["INPUT SUFFIX"] == "FASTQ":
+		if cd["INPUT TYPE"] == "FASTQ":
 			cd["INPUT FILES FULL"] = tools.get_FASTQs(cd["INPUT DIR"])
 
-		elif cd["INPUT SUFFIX"] == "BAM":
+		elif cd["INPUT TYPE"] == "BAM":
 			cd["INPUT FILES FULL"] = tools.get_BAMs(cd["INPUT DIR"])
 
-		elif "POST:" in cd["INPUT SUFFIX"]:
-			SUFFIX = cd["INPUT SUFFIX"]
+		elif "POST:" in cd["INPUT TYPE"]:
+			SUFFIX = cd["INPUT TYPE"]
 			SUFFIX = SUFFIX.split(":")[1]
 			cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)
 
-		elif cd["INPUT SUFFIX"] == "NONE":
+		elif cd["INPUT TYPE"] == "NONE":
 			cd["INPUT FILES FULL"] = [cd["FUNCTION NAME"]]
 
 		else:
-			sys.exit("ERROR: Incorrect input into <INPUT SUFFIX> command in function constructor.")
+			sys.exit("ERROR: Incorrect input into <INPUT TYPE> command in function constructor.")
 
 		# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
 		cd["INPUT FILES TRIMMED"] = []
 		for file in cd["INPUT FILES FULL"]:
-			trimmed_file = file.rsplit("/", 1)[1]
-			cd["INPUT FILES TRIMMED"].append(trimmed_file)
+			if cd["INPUT TYPE"] != "NONE":
+				trimmed_file = file.rsplit("/", 1)[1]
+				cd["INPUT FILES TRIMMED"].append(trimmed_file)
+			else:
+				cd["INPUT FILES TRIMMED"] = [cd["FUNCTION NAME"]]
 
 
 
@@ -181,6 +187,7 @@ def main():
 		script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
 		script_ind.write("#SBATCH --output=%s/%s.out\n" % (record["output"], input_trim_ind))
 		script_ind.write("#SBATCH --error=%s/%s.err\n" % (record["error"], input_trim_ind))
+		script_ind.write("#SBATCH --workdir=%s\n" % record["directory"])
 
 		# Optional for sbatch script
 		if cd["PARTITION"] != "default":

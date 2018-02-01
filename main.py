@@ -134,6 +134,7 @@ def main():
 
 				print " %s" % name
 
+				# Get AUTO CALLED function from function constructors
 				auto_call = commands.getoutput("grep '<AUTO CALL>' %s" % function_input_path)
 				auto_call = auto_call.split("<AUTO CALL>")[1]
 				auto_call = auto_call.replace(" ", "")

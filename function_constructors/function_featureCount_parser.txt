@@ -24,7 +24,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> TEST_MERGE
+<FUNCTION NAME> FC_MERGE
 
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> 
@@ -49,8 +49,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Input files can be found in this directory (URL, RAW, POST:[NAME])
 <INPUT DIR> POST:FEATURECOUNT
 
-# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
-<INPUT SUFFIX> NONE
+# Type of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
+<INPUT TYPE> NONE
 
 # Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
 <INPUT MULT> SINGLE
@@ -73,10 +73,10 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Any task sheet variables may be used below.
 # The shell scripts will be created in the output directory's RED.
 # Automatically stored variables for use here:
-# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>
+# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>, <WORKING DIR>
 
 <SCRIPT COMMAND> {
 
-python ./function_constructors/function_tools/featureCount_parser.py <INPUT DIR>
+python <WORKING DIR>/function_constructors/function_tools/featureCount_parser.py <INPUT DIR>
 
 }

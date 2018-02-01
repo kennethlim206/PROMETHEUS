@@ -73,12 +73,12 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Any task sheet variables may be used below.
 # The shell scripts will be created in the output directory's RED.
 # Automatically stored variables for use here:
-# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>
+# <INPUT FILES FULL>, <INPUT FILES TRIMMED>, <USE FA>, <USE ANNO>, <WORKING DIR>
 
 <SCRIPT COMMAND> {
 
 module load <STAR MODULE>
 
-STAR --genomeDir <INDEX DIR> --runThreadN <RUN THREAD> --readFilesIn <INPUT FILES FULL> --outFileNamePrefix <INPUT FILES TRIMMED> --outSAMtype BAM SortedByCoordinate --outWigType wiggle --quantMode TranscriptomeSAM GeneCounts --outReadsUnmapped Fastx <ZIPPED> <ALIGN PARAMS>
+STAR --genomeDir <INDEX DIR> --runThreadN <RUN THREAD> --readFilesIn <INPUT FILES FULL> --outFileNamePrefix <OUTPUT DIR>/<INPUT FILES TRIMMED>. --outSAMtype BAM SortedByCoordinate --outWigType wiggle --quantMode TranscriptomeSAM GeneCounts --outReadsUnmapped Fastx <ZIPPED> <ALIGN PARAMS>
 
 }
