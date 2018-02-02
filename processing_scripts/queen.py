@@ -3,6 +3,7 @@ import sys
 import imp
 import commands
 import time
+import datetime
 
 # Figures out the order for function requests
 def main():
@@ -37,11 +38,7 @@ def main():
 			status, ID_all = commands.getstatusoutput(cmd)
 
 		# Read sbatch output
-		if status == 0:
-			print ID_all
-			print ""
-
-		else:
+		if status != 0:
 			sys.exit(" ERROR:\n%s" % ID_all)
 
 		# If there is more than 1 function submitted
@@ -50,8 +47,8 @@ def main():
 			
 			# While at least 1 job is pending
 			while status == "PENDING":
-				time.sleep(60)
-				print "Sumbitted on: %s\n" % datetime.datetime.now().strftime("%m.%d.%Y %H:%M:%S")
+				time.sleep(300)
+				print "Check status: %s\n" % datetime.datetime.now().strftime("%m.%d.%Y %H:%M:%S")
 				
 				ID_list = ID_all.split(":")
 

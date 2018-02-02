@@ -77,6 +77,6 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 <SCRIPT COMMAND> {
 
-python <WORKING DIR>/function_constructors/function_tools/featureCount_parser.py <INPUT DIR>
+python <WORKING DIR>/user_function_constructors/function_tools/featureCount_parser.py <INPUT DIR>
 
 }

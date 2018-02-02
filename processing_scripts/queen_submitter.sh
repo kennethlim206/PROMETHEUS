@@ -1,9 +1,8 @@
 #!/bin/bash -l
 
 #SBATCH --job-name=QUEEN
-#SBATCH --time=48:00:00
-#SBATCH --output=./processing_scripts/temp/queen-%j.out
-#SBATCH --error=./processing_scripts/temp/queen-%j.err
+#SBATCH --output=./temp/queen-%j.out
+#SBATCH --error=./temp/queen-%j.err
 #SBATCH --partition=gc
 
 TASK="$1"

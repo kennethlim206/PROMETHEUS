@@ -13,7 +13,7 @@ def main():
 	# Load task info from reader
 	td = tools.task_reader(sys.argv[1])
 	cd = tools.function_reader(sys.argv[2])
-	gd = tools.genome_reader("%s/genome_tables/%s" % (WORKING_DIR, td["REF TABLE"]), td["REF ID"])
+	gd = tools.genome_reader("%s/user_genome_tables/%s" % (WORKING_DIR, td["REF TABLE"]), td["REF ID"])
 
 	td["WORKING DIR"] = WORKING_DIR
 

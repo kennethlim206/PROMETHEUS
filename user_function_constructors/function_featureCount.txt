@@ -33,7 +33,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 <DEPENDENCY> afterok
 
 # Sbatch parameters
-<TIME> 2:00:00
+<TIME> 01:00:00
 <PARTITION> gc
 <CORES> default
 <MEM PER CPU> default
@@ -49,8 +49,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Input files can be found in this directory (URL, RAW, POST:[NAME])
 <INPUT DIR> POST:ALIGN
 
-# Suffix of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
-<INPUT SUFFIX> BAM
+# Type of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
+<INPUT TYPE> BAM
 
 # Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
 <INPUT MULT> SINGLE
