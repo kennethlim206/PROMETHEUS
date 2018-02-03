@@ -1,9 +1,13 @@
 import os
 import sys
+import imp
 import commands
 
 # User interface
 def main():
+
+	# Load progress report module
+	progress = imp.load_source("progress", "./processing_scripts/progress_report.py")
 
 	os.popen("chmod +x ./processing_scripts/*.sh")
 
@@ -101,6 +105,7 @@ def main():
 			function_files.close()
 
 			print ""
+			print " report:[function] = report progress (ex: report:align)"
 			print " exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""
@@ -110,98 +115,109 @@ def main():
 			if function_input == "exit":
 				sys.exit(" Bye for now!")
 
-			# Parse and load function info
-			function_input = function_input.replace(" ",  "")
-			function_names_list = function_input.split("->")
-
-			function_path_list = []
-
-			# Add time together from all jobs
-			time_list = []
-
-			print " You have chosen the following function(s):"
-
-			for name in function_names_list:
+			if "report:" in function_input:
+				function_report_name = function_input.split(":")[1]
 
 				# Error for non-existing user input
-				if name not in function_options:
-					sys.exit(" ERROR: Inputted function name does not exist: %s" % name)
+				if function_report_name not in function_options:
+					sys.exit(" ERROR: Inputted function name does not exist: %s" % function_report_name)
+						
+				progress.main(task_input_path, function_report_name)
 
-				function_input_path = "./user_function_constructors/%s" % function_options[name]
+			else:
 
-				# Error for non-existing user input
-				if not os.path.isfile(function_input_path):
-					sys.exit(" ERROR: Incorrect function path. Please check the input path in ./user_function_constructors/paths.txt")
+				# Parse and load function info
+				function_input = function_input.replace(" ",  "")
+				function_names_list = function_input.split("->")
 
-				function_path_list.append(function_input_path)
+				function_path_list = []
 
-				print " %s" % name
+				# Add time together from all jobs
+				time_list = []
 
-				# Get AUTO CALLED function from function constructors
-				time_call = commands.getoutput("grep '<TIME>' %s" % function_input_path)
-				time_call = time_call.split("<TIME>")[1]
-				time_call = time_call.replace(" ", "")
-				time_call = time_call.replace("\n", "")
-				time_list.append(time_call)
+				print " You have chosen the following function(s):"
 
-				# Get AUTO CALLED function from function constructors
-				auto_call = commands.getoutput("grep '<AUTO CALL>' %s" % function_input_path)
-				auto_call = auto_call.split("<AUTO CALL>")[1]
-				auto_call = auto_call.replace(" ", "")
-				auto_call = auto_call.replace("\n", "")
+				for name in function_names_list:
 
-				if auto_call != "":
-					auto_path = "./user_function_constructors/%s" % auto_call
+					# Error for non-existing user input
+					if name not in function_options:
+						sys.exit(" ERROR: Inputted function name does not exist: %s" % name)
 
-					# Error for non-existing autocall input
-					if not os.path.isfile(auto_path):
-						sys.exit(" ERROR: Incorrect <AUTO CALL> file name. Please check function constructor: %s" % path.rsplit("/", 1)[1])
+					function_input_path = "./user_function_constructors/%s" % function_options[name]
 
-					# Get AUTO CALLED function from function constructors
-					time_call = commands.getoutput("grep '<TIME>' %s" % auto_path)
+					# Error for non-existing user input
+					if not os.path.isfile(function_input_path):
+						sys.exit(" ERROR: Incorrect function path. Please check the input path in ./user_function_constructors/paths.txt")
+
+					function_path_list.append(function_input_path)
+
+					print " %s" % name
+
+					# Get TIME function from function constructors
+					time_call = commands.getoutput("grep '<TIME>' %s" % function_input_path)
 					time_call = time_call.split("<TIME>")[1]
 					time_call = time_call.replace(" ", "")
 					time_call = time_call.replace("\n", "")
 					time_list.append(time_call)
 
-					function_path_list.append(auto_path)
+					# Get AUTO CALLED function from function constructors
+					auto_call = commands.getoutput("grep '<AUTO CALL>' %s" % function_input_path)
+					auto_call = auto_call.split("<AUTO CALL>")[1]
+					auto_call = auto_call.replace(" ", "")
+					auto_call = auto_call.replace("\n", "")
 
-					print " + AUTO CALLED: %s" % auto_call
-			
-			# Generate string input to give to queen
-			function_string = ""
-			for path in function_path_list:
-				function_string += "%s+" % path
+					if auto_call != "":
+						auto_path = "./user_function_constructors/%s" % auto_call
 
-			print ""
-			print " ------------------------------------------------------------------------------- "
-			print " Constructing queen module ..."
-			print ""
+						# Error for non-existing autocall input
+						if not os.path.isfile(auto_path):
+							sys.exit(" ERROR: Incorrect <AUTO CALL> file name. Please check function constructor: %s" % path.rsplit("/", 1)[1])
 
-			# Add time together
-			time_list.append("02:00:00")
-			total_secs = 0
-			for tm in time_list:
-			    time_parts = [int(s) for s in tm.split(':')]
-			    total_secs += (time_parts[0] * 60 + time_parts[1]) * 60 + time_parts[2]
-			total_secs, sec = divmod(total_secs, 60)
-			hr, m = divmod(total_secs, 60)
-			time = "%d:%02d:%02d" % (hr, m, sec)
+						# Get AUTO CALLED function from function constructors
+						time_call = commands.getoutput("grep '<TIME>' %s" % auto_path)
+						time_call = time_call.split("<TIME>")[1]
+						time_call = time_call.replace(" ", "")
+						time_call = time_call.replace("\n", "")
+						time_list.append(time_call)
 
-			# Sumbit QUEEN module
-			cmd = "sbatch --time=%s ./processing_scripts/queen_submitter.sh %s %s" % (time, task_input_path, function_string[:-1])
-			
-			status = 0
-			ID = "Submitted job as 1738"
+						function_path_list.append(auto_path)
 
-			status, ID = commands.getstatusoutput(cmd)
-			if status == 0:
-				ID_split = ID.split(" ")
-				ID = int(ID_split[3])
-				print " Your queen module has been submitted: %i" % ID
-				print " Estimated total run time: %s" % time
-			else:
-				sys.exit(" ERROR:\n%s" % ID)
+						print " + AUTO CALLED: %s" % auto_call
+				
+				# Generate string input to give to queen
+				function_string = ""
+				for path in function_path_list:
+					function_string += "%s+" % path
+
+				print ""
+				print " ------------------------------------------------------------------------------- "
+				print " Constructing queen module ..."
+				print ""
+
+				# Add time together
+				total_secs = 0
+				for tm in time_list:
+				    time_parts = [int(s) for s in tm.split(':')]
+				    total_secs += (time_parts[0] * 60 + time_parts[1]) * 60 + time_parts[2]
+				total_secs, sec = divmod(total_secs, 60)
+				hr, m = divmod(total_secs, 60)
+				time_display = "%d:%02d:%02d" % (hr, m, sec)
+				time = "%d:%02d:%02d" % (hr+24, m, sec)
+
+				# Sumbit QUEEN module
+				cmd = "sbatch --time=%s ./processing_scripts/queen_submitter.sh %s %s" % (time, task_input_path, function_string[:-1])
+				
+				status = 0
+				ID = "Submitted job as 1738"
+
+				# status, ID = commands.getstatusoutput(cmd)
+				if status == 0:
+					ID_split = ID.split(" ")
+					ID = int(ID_split[3])
+					print " Your queen module has been submitted: %i" % ID
+					print " Estimated total run time: %s (+ time in queue)" % time_display
+				else:
+					sys.exit(" ERROR:\n%s" % ID)
 
 
 
