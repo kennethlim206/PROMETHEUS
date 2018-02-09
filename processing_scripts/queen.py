@@ -7,6 +7,10 @@ import datetime
 
 # Figures out the order for function requests
 def main():
+
+	# If true, will not submit sbatch and return pseudo data instead
+	test = False
+
 	task_path = sys.argv[1]
 	function_string = sys.argv[2]
 
@@ -34,7 +38,7 @@ def main():
 		ID_num += 2
 
 		# Non test case
-		if len(sys.argv) == 3:
+		if not test:
 			status, ID_all = commands.getstatusoutput(cmd)
 
 		# Read sbatch output

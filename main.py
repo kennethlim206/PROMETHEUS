@@ -6,8 +6,13 @@ import commands
 # User interface
 def main():
 
+	# Queue wait time
+	queue_time = 24
+	# If true, will not submit sbatch and return pseudo data instead
+	test = False
+
 	# Load progress report module
-	progress = imp.load_source("progress", "./processing_scripts/progress_report.py")
+	report = imp.load_source("report", "./processing_scripts/progress_report.py")
 
 	os.popen("chmod +x ./processing_scripts/*.sh")
 
@@ -81,7 +86,7 @@ def main():
 
 			# Input function from user
 			print " ------------------------------------------------------------------------------- "
-			print "|                  STEP 2: PLEASE CHOOSE A FUNCTION(S) OR EXIT                  |"
+			print "|                   STEP 2: PLEASE CHOOSE FUNCTION(S) OR EXIT                   |"
 			print " ------------------------------------------------------------------------------- "
 			print " Note: Users can perform functions sequentially with the '->' symbol."
 			print " Example: download -> align -> feature"
@@ -105,7 +110,7 @@ def main():
 			function_files.close()
 
 			print ""
-			print " report:[function] = report progress (ex: report:align)"
+			print " report:[function] = reports progress (ex: report:feature)"
 			print " exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""
@@ -122,7 +127,7 @@ def main():
 				if function_report_name not in function_options:
 					sys.exit(" ERROR: Inputted function name does not exist: %s" % function_report_name)
 						
-				progress.main(task_input_path, function_report_name)
+				report.main(task_input_path, "./user_function_constructors/%s" % function_options[function_report_name])
 
 			else:
 
@@ -202,7 +207,7 @@ def main():
 				total_secs, sec = divmod(total_secs, 60)
 				hr, m = divmod(total_secs, 60)
 				time_display = "%d:%02d:%02d" % (hr, m, sec)
-				time = "%d:%02d:%02d" % (hr+24, m, sec)
+				time = "%d:%02d:%02d" % (hr+queue_time, m, sec)
 
 				# Sumbit QUEEN module
 				cmd = "sbatch --time=%s ./processing_scripts/queen_submitter.sh %s %s" % (time, task_input_path, function_string[:-1])
@@ -210,7 +215,9 @@ def main():
 				status = 0
 				ID = "Submitted job as 1738"
 
-				# status, ID = commands.getstatusoutput(cmd)
+				if not test:
+					status, ID = commands.getstatusoutput(cmd)
+
 				if status == 0:
 					ID_split = ID.split(" ")
 					ID = int(ID_split[3])

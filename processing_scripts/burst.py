@@ -2,8 +2,12 @@ import os
 import sys
 import commands
 import imp
+from datetime import datetime
 
 def main():
+
+	# If true, will not submit sbatch and return pseudo data instead
+	test = False
 
 	WORKING_DIR = os.getcwd()
 
@@ -77,6 +81,23 @@ def main():
 			else:
 				cd["INPUT FILES TRIMMED"] = [cd["FUNCTION NAME"]]
 
+				
+
+	####################################
+	###   ALIGNING PAIRED-END DATA   ###
+	####################################
+
+	if cd["FUNCTION NAME"] == "ALIGN":
+		for i in range(0,len(cd["INPUT FILES TRIMMED"])):
+			if td["SINGLE PAIR"] == "SE":
+				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
+
+			elif td["SINGLE PAIR"] == "PE":
+				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
+
+			else:
+				sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
+
 
 
 	######################
@@ -113,23 +134,6 @@ def main():
 
 
 
-	####################################
-	###   ALIGNING PAIRED-END DATA   ###
-	####################################
-
-	if cd["FUNCTION NAME"] == "ALIGN":
-		for i in range(0,len(cd["INPUT FILES TRIMMED"])):
-			if td["SINGLE PAIR"] == "SE":
-				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
-
-			elif td["SINGLE PAIR"] == "PE":
-				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
-
-			else:
-				sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
-
-
-
 	#######################
 	###   ZIPPED DATA   ###
 	#######################
@@ -148,6 +152,13 @@ def main():
 	############################
 	###   GENERATE SCRIPTS   ###
 	############################
+
+	submission_record = open("%s/submission_record.txt" % record["red"], "a")
+
+	submit_time = commands.getoutput("grep '<SUBMITTED>' %s/submission_record.txt" % record["red"])
+	
+	if submit_time == "":
+		submission_record.write("<SUBMITTED> %s\n\n" % datetime.now().strftime("%m.%d.%Y %H:%M:%S"))
 
 	test_num = 1738
 
@@ -199,8 +210,6 @@ def main():
 		if cd["MEM PER CPU"] != "default":
 			script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
 
-
-
 		script_ind.write("")
 		script_ind.write(cmd_ind)
 		script_ind.write("")
@@ -214,9 +223,7 @@ def main():
 		###   SUBMIT SCRIPT   ###
 		#########################
 
-		submission_record = open("%s/submission_record.txt" % record["red"], "a")
-
-		pre_submit_print = "Submitting job %s: %i/%i" % (cd["FUNCTION NAME"], i+1, len(cd["INPUT FILES FULL"]))
+		pre_submit_print = "%i/%i" % (i+1, len(cd["INPUT FILES FULL"]))
 
 		submit_cmd = "sbatch %s" % script_ind_path
 		
@@ -224,7 +231,7 @@ def main():
 		ID = "Submitting job as %i" % test_num
 		test_num += 1
 
-		if len(sys.argv) == 3:
+		if not test:
 			status, ID = commands.getstatusoutput(submit_cmd)
 
 		# Analyze result of sbatch submission
@@ -232,16 +239,12 @@ def main():
 
 			ID_split = ID.split(" ")
 			ID = int(ID_split[3])
-
-			return_message = "Job %s submitted as %i" % (cd["FUNCTION NAME"], ID)
 			
 		else:
 			sys.exit("ERROR:\n%s" % ID)
 
 		# Output job submission statements
-		submission_record.write("%s\n" % pre_submit_print)
-		submission_record.write("%s\n" % submit_cmd)
-		submission_record.write("%s\n" % return_message)
+		submission_record.write("%s\t%s\t%s\n" % (pre_submit_print, script_ind_path, ID))
 
 		return_string += "%s:" % ID
 
