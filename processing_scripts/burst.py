@@ -7,7 +7,7 @@ from datetime import datetime
 def main():
 
 	# If true, will not submit sbatch and return pseudo data instead
-	test = False
+	test = True
 
 	WORKING_DIR = os.getcwd()
 
@@ -72,6 +72,19 @@ def main():
 		else:
 			sys.exit("ERROR: Incorrect input into <INPUT TYPE> command in function constructor.")
 
+		# INPUT PART 2.5: For ALIGN jobs with PE reads, split the sample names in half
+		PE_LT = dict()
+		FW_STRAND = []
+		if cd["FUNCTION NAME"] == "ALIGN" and td["SINGLE PAIR"] == "PE" and "<REVERSE STRAND>" in cd["SCRIPT COMMAND"]:
+			for i in range(1, len(cd["INPUT FILES FULL"]), 2):
+				FW_path = cd["INPUT FILES FULL"][i-1]
+				RV_path = cd["INPUT FILES FULL"][i]
+
+				PE_LT[FW_path] = RV_path
+				FW_STRAND.append(FW_path)
+
+			cd["INPUT FILES FULL"] = FW_STRAND
+
 		# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
 		cd["INPUT FILES TRIMMED"] = []
 		for file in cd["INPUT FILES FULL"]:
@@ -83,12 +96,18 @@ def main():
 
 				
 
-	####################################
-	###   ALIGNING PAIRED-END DATA   ###
-	####################################
+	#####################################################
+	###   ALIGNING PAIRED-END DATA: NAME CONVERSION   ###
+	#####################################################
 
 	if cd["FUNCTION NAME"] == "ALIGN":
 		for i in range(0,len(cd["INPUT FILES TRIMMED"])):
+
+			# Error for suffix not matching all samples (for PE reads that you want to combine, this shouldn't
+			# be an issue)
+			if td["FASTQ SUFFIX"] not in cd["INPUT FILES TRIMMED"][i]:
+				sys.exit("ERROR: Please adjust <FASTQ SUFFIX> in task sheet. Suffix not found in file name: %s" % cd["INPUT FILES TRIMMED"][i])
+
 			if td["SINGLE PAIR"] == "SE":
 				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
 
@@ -185,6 +204,15 @@ def main():
 
 		cmd_ind = cmd_ind.replace("<INPUT FILES FULL>", input_full_ind)
 		cmd_ind = cmd_ind.replace("<INPUT FILES TRIMMED>", input_trim_ind)
+
+		# For ALIGN jobs only
+		if cd["FUNCTION NAME"] == "ALIGN" and td["SINGLE PAIR"] == "PE" and "<REVERSE STRAND>" in cd["SCRIPT COMMAND"]:
+			cmd_ind = cmd_ind.replace("<REVERSE STRAND>", PE_LT[input_full_ind])
+		else:
+			cmd_ind = cmd_ind.replace("<REVERSE STRAND>", "")
+
+		# Final step turn double empty spaces into single empty spaces to account for non-existent variables
+		cmd_ind = cmd_ind.replace("  ", " ")
 
 		script_ind_path = "%s/%s.sh" % (record["scripts"], input_trim_ind)
 

@@ -52,7 +52,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L001.fastq.gz
+<FASTQ SUFFIX> .fastq.gz
 
 
 
