@@ -23,11 +23,11 @@ def main():
 
 
 
-	#####################
-	###   INPUT DIR   ###
-	#####################
+	#################
+	###   INPUT   ###
+	#################
 
-	# INPUT PART 1: Convert INPUT DIR to directory containing input files
+	# INPUT PART 1: Get specified INPUT DIR from task sheet
 	if cd["INPUT DIR"] == "URL":
 		cd["INPUT DIR"] = td["FTP COMMAND"]
 
@@ -72,50 +72,65 @@ def main():
 		else:
 			sys.exit("ERROR: Incorrect input into <INPUT TYPE> command in function constructor.")
 
-		# INPUT PART 2.5: For ALIGN jobs with PE reads, split the sample names in half
-		PE_LT = dict()
-		FW_STRAND = []
-		if cd["FUNCTION NAME"] == "ALIGN" and td["SINGLE PAIR"] == "PE" and "<REVERSE STRAND>" in cd["SCRIPT COMMAND"]:
-			for i in range(1, len(cd["INPUT FILES FULL"]), 2):
-				FW_path = cd["INPUT FILES FULL"][i-1]
-				RV_path = cd["INPUT FILES FULL"][i]
+		# If each input file is to be analyzed individually, further parsing is required
+		if cd["INPUT MULT"] == "SINGLE":
 
-				PE_LT[FW_path] = RV_path
-				FW_STRAND.append(FW_path)
+			# For ALIGN jobs with PE reads, split the sample names in half
+			PE_LT = dict()
+			FW_STRAND = []
+			if cd["FUNCTION NAME"] == "ALIGN" and td["SINGLE PAIR"] == "PE" and "<REVERSE STRAND>" in cd["SCRIPT COMMAND"]:
+				for i in range(1, len(cd["INPUT FILES FULL"]), 2):
+					FW_path = cd["INPUT FILES FULL"][i-1]
+					RV_path = cd["INPUT FILES FULL"][i]
 
-			cd["INPUT FILES FULL"] = FW_STRAND
+					PE_LT[FW_path] = RV_path
+					FW_STRAND.append(FW_path)
 
-		# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
-		cd["INPUT FILES TRIMMED"] = []
-		for file in cd["INPUT FILES FULL"]:
-			if cd["INPUT TYPE"] != "NONE":
-				trimmed_file = file.rsplit("/", 1)[1]
-				cd["INPUT FILES TRIMMED"].append(trimmed_file)
-			else:
-				cd["INPUT FILES TRIMMED"] = [cd["FUNCTION NAME"]]
+				cd["INPUT FILES FULL"] = FW_STRAND
 
-				
+			# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
+			cd["INPUT FILES TRIMMED"] = []
+			for file in cd["INPUT FILES FULL"]:
+				if cd["INPUT TYPE"] != "NONE":
+					trimmed_file = file.rsplit("/", 1)[1]
+					cd["INPUT FILES TRIMMED"].append(trimmed_file)
+				else:
+					cd["INPUT FILES TRIMMED"] = ["ALL"]
 
-	#####################################################
-	###   ALIGNING PAIRED-END DATA: NAME CONVERSION   ###
-	#####################################################
+			# For ALIGN jobs, replace specified suffix with _SE or _PE 
+			if cd["FUNCTION NAME"] == "ALIGN":
+				for i in range(0,len(cd["INPUT FILES TRIMMED"])):
 
-	if cd["FUNCTION NAME"] == "ALIGN":
-		for i in range(0,len(cd["INPUT FILES TRIMMED"])):
+					# Error for suffix not matching all samples (for PE reads that you want to combine, this shouldn't
+					# be an issue)
+					if td["FASTQ SUFFIX"] not in cd["INPUT FILES TRIMMED"][i]:
+						sys.exit("ERROR: Please adjust <FASTQ SUFFIX> in task sheet. Suffix not found in file name: %s" % cd["INPUT FILES TRIMMED"][i])
 
-			# Error for suffix not matching all samples (for PE reads that you want to combine, this shouldn't
-			# be an issue)
-			if td["FASTQ SUFFIX"] not in cd["INPUT FILES TRIMMED"][i]:
-				sys.exit("ERROR: Please adjust <FASTQ SUFFIX> in task sheet. Suffix not found in file name: %s" % cd["INPUT FILES TRIMMED"][i])
+					if td["SINGLE PAIR"] == "SE":
+						cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
 
-			if td["SINGLE PAIR"] == "SE":
-				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
+					elif td["SINGLE PAIR"] == "PE":
+						cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
 
-			elif td["SINGLE PAIR"] == "PE":
-				cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
+					else:
+						sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
 
-			else:
-				sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
+		# Combine all input files into single string with user inputted separator
+		elif "ALL:" in cd["INPUT MULT"]:
+			if "<INPUT FILES TRIMMED>" in cd["SCRIPT COMMAND"]:
+				sys.exit("ERROR: <INPUT FILES TRIMMED> variable in function constructor script command not permitted when <INPUT MULT> = MULT.")
+
+			separater = cd["INPUT MULT"].split(":", 1)[1]
+			input_string = ""
+
+			for file in cd["INPUT FILES FULL"]:
+				input_string += "%s:" % file
+
+			cd["INPUT FILES FULL"] = [input_string[:-1]]
+			cd["INPUT FILES TRIMMED"] = ["ALL"]
+
+		else:
+			sys.exit("ERROR: Incorrect input into <INPUT MULT> variable in function constructor: %s" % cd["INPUT MULT"])
 
 
 
@@ -143,13 +158,15 @@ def main():
 	###   REF FA AND ANNO   ###
 	###########################
 
-	# Decide whether to use customized ref genome and annotation
+	# Decide whether to use customized ref genome and annotation (currently no customizations for BED files)
 	if td["CUSTOMIZE"] == "T":
 		td["USE FA"] = "%s/custom_genome/%s" % (td["INDEX DIR"], td["CUSTOM FA"])
 		td["USE ANNO"] = "%s/custom_genome/%s" % (td["INDEX DIR"], td["CUSTOM ANNO"])
 	elif td["CUSTOMIZE"] == "F":
 		td["USE FA"] = gd["REF FA"]
-		td["USE ANNO"] = gd["CUSTOM ANNO"]
+		td["USE ANNO"] = gd["REF ANNO"]
+
+	td["USE BED"] = gd["REF BED"]
 
 
 
@@ -214,7 +231,7 @@ def main():
 		# Final step turn double empty spaces into single empty spaces to account for non-existent variables
 		cmd_ind = cmd_ind.replace("  ", " ")
 
-		script_ind_path = "%s/%s.sh" % (record["scripts"], input_trim_ind)
+		script_ind_path = "%s/%s_%s.sh" % (record["scripts"], cd["FUNCTION NAME"], input_trim_ind)
 
 		# Place in RED of OUTPUT DIR
 		script_ind = open(script_ind_path, "w")
@@ -224,8 +241,8 @@ def main():
 		# Required for sbatch script
 		script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
 		script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
-		script_ind.write("#SBATCH --output=%s/%s.out\n" % (record["output"], input_trim_ind))
-		script_ind.write("#SBATCH --error=%s/%s.err\n" % (record["error"], input_trim_ind))
+		script_ind.write("#SBATCH --output=%s/%s_%s.out\n" % (record["output"], cd["FUNCTION NAME"], input_trim_ind))
+		script_ind.write("#SBATCH --error=%s/%s_%s.err\n" % (record["error"], cd["FUNCTION NAME"], input_trim_ind))
 		script_ind.write("#SBATCH --workdir=%s\n" % record["directory"])
 
 		# Optional for sbatch script

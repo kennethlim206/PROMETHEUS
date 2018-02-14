@@ -24,7 +24,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> ALIGN
+<FUNCTION NAME> RSEQC_IND
 
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> 
@@ -33,8 +33,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 <DEPENDENCY> afterok
 
 # Sbatch parameters
-<TIME> 12:00:00
-<PARTITION> gc256
+<TIME> 24:00:00
+<PARTITION> gc128
 <CORES> 10
 <MEM PER CPU> 8G
 
@@ -47,10 +47,10 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Use the variable <INPUT FILE> in the <SCRIPT COMMAND> below
 
 # Input files can be found in this directory (URL, RAW, POST:[NAME])
-<INPUT DIR> RAW
+<INPUT DIR> POST:ALIGN
 
 # Type of input file into this command (FASTQ, BAM, OTHER:[SUFFIX], NONE)
-<INPUT TYPE> FASTQ
+<INPUT TYPE> BAM
 
 # Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
 <INPUT MULT> SINGLE
@@ -62,7 +62,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 •--------------------------------------------------------------------------------------------------•
 
 # Output files can be found in this directory (RAW, INDEX, POST:[JOB NAME])
-<OUTPUT DIR> POST:ALIGN
+<OUTPUT DIR> POST:RSEQC
 
 
 
@@ -77,8 +77,11 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 <SCRIPT COMMAND> {
 
-module load <STAR MODULE>
+module load rseqc/2.6.3
 
-STAR --genomeDir <INDEX DIR> --runThreadN <RUN THREAD> --readFilesIn <INPUT FILES FULL> <REVERSE STRAND> --outFileNamePrefix <OUTPUT DIR>/<INPUT FILES TRIMMED>. --outSAMtype BAM SortedByCoordinate --outWigType wiggle --quantMode TranscriptomeSAM GeneCounts --outReadsUnmapped Fastx <ZIPPED> <ALIGN PARAMS>
+RPKM_saturation.py -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
+FPKM_count -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
+bam_stat.py -i <INPUT FILES FULL>
+read_GC.py -i <INPUT FILES FULL>
 
 }
