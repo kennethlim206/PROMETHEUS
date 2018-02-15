@@ -8,6 +8,7 @@ def main():
 
 	# If true, will not submit sbatch and return pseudo data instead
 	test = True
+	test_num = 1738
 
 	WORKING_DIR = os.getcwd()
 
@@ -23,56 +24,58 @@ def main():
 
 
 
-	#################
-	###   INPUT   ###
-	#################
+	##########################
+	###   INPUT SETTINGS   ###
+	##########################
 
-	# INPUT PART 1: Get specified INPUT DIR from task sheet
-	if cd["INPUT DIR"] == "URL":
-		cd["INPUT DIR"] = td["FTP COMMAND"]
+	cd["INPUT FILES FULL"] = []
+	cd["INPUT FILES TRIMMED"] = []
 
-	elif cd["INPUT DIR"] == "RAW":
-		cd["INPUT DIR"] = td["RAW DATA DIR"]
+	# PART 1: Parse URL input separately from other types.
+	if cd["INPUT DIR"] == "ONLINE":
+		if cd["INPUT TYPE"] == "URL":
+			print "URL" #CODE HERE
 
-	elif cd["INPUT DIR"] == "INDEX":
-		cd["INPUT DIR"] = td["INDEX DIR"]
+		elif cd["INPUT TYPE"] == "SRR":
+			print "SRR"
 
-	elif "POST:" in cd["INPUT DIR"]:
+		else:
+			sys.exit("ERROR: <INPUT TYPE> variable in function constructor, %s must be URL or SRR when <INPUT DIR> is ONLINE.")
 
-		# Find correct input directory
-		POST_NAME = cd["INPUT DIR"].split("POST:")[1]
-		INPUT_DIR = "%s/%s" % (td["POST DIR"], POST_NAME)
-		cd["INPUT DIR"] = INPUT_DIR
+	elif cd["INPUT DIR"] != "ONLINE":
 
-	else:
-		sys.exit("ERROR: Incorrect input into <INPUT DIR> command in function constructor.")
-
-	# If INPUT DIR is a URL, then the command does not require further parsing.
-	if cd["INPUT DIR"] != "URL":
+		# PART 2: Convert <INPUT DIR> to specified directory
+		if cd["INPUT DIR"] == "RAW":
+			cd["INPUT DIR"] = td["RAW DATA DIR"]
+		elif "POST:" in cd["INPUT DIR"]:
+			# Find correct input directory
+			POST_NAME = cd["INPUT DIR"].split("POST:")[1]
+			INPUT_DIR = "%s/%s" % (td["POST DIR"], POST_NAME)
+			cd["INPUT DIR"] = INPUT_DIR
+		else:
+			sys.exit("ERROR: Incorrect input into <INPUT DIR> command in function constructor.")
 
 		# Check if input directory is actual directory
 		if not os.path.isdir(cd["INPUT DIR"]):
 			sys.exit("ERROR: task sheet variable associated with <INPUT DIR> does not exist: %s" % cd["INPUT DIR"])
 
-		# INPUT PART 2: Retrieve INPUT DIR files based on suffix
+		# PART 3: Retrieve INPUT DIR files based on suffix
 		if cd["INPUT TYPE"] == "FASTQ":
 			cd["INPUT FILES FULL"] = tools.get_FASTQs(cd["INPUT DIR"])
-
 		elif cd["INPUT TYPE"] == "BAM":
 			cd["INPUT FILES FULL"] = tools.get_BAMs(cd["INPUT DIR"])
-
 		elif "POST:" in cd["INPUT TYPE"]:
 			SUFFIX = cd["INPUT TYPE"]
 			SUFFIX = SUFFIX.split(":")[1]
 			cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)
-
 		elif cd["INPUT TYPE"] == "NONE":
 			cd["INPUT FILES FULL"] = [cd["FUNCTION NAME"]]
-
+		elif cd["INPUT TYPE"] == "URL" or cd["INPUT TYPE"] == "SRR":
+			sys.exit("ERROR: <INPUT TYPE> variable in function constructor, %s is only allowed when <INPUT DIR> is ONLINE.")
 		else:
 			sys.exit("ERROR: Incorrect input into <INPUT TYPE> command in function constructor.")
 
-		# If each input file is to be analyzed individually, further parsing is required
+		# PART 4: If each input file is to be analyzed individually, further parsing is required
 		if cd["INPUT MULT"] == "SINGLE":
 
 			# For ALIGN jobs with PE reads, split the sample names in half
@@ -88,8 +91,7 @@ def main():
 
 				cd["INPUT FILES FULL"] = FW_STRAND
 
-			# INPUT PART 3: Trim INPUT FILES to get rid of prefix paths
-			cd["INPUT FILES TRIMMED"] = []
+			# PART 5: Trim full input paths
 			for file in cd["INPUT FILES FULL"]:
 				if cd["INPUT TYPE"] != "NONE":
 					trimmed_file = file.rsplit("/", 1)[1]
@@ -97,21 +99,16 @@ def main():
 				else:
 					cd["INPUT FILES TRIMMED"] = ["ALL"]
 
-			# For ALIGN jobs, replace specified suffix with _SE or _PE 
+			# For ALIGN jobs, replace specified suffix with _SE or _PE
 			if cd["FUNCTION NAME"] == "ALIGN":
 				for i in range(0,len(cd["INPUT FILES TRIMMED"])):
-
-					# Error for suffix not matching all samples (for PE reads that you want to combine, this shouldn't
-					# be an issue)
+					# 
 					if td["FASTQ SUFFIX"] not in cd["INPUT FILES TRIMMED"][i]:
 						sys.exit("ERROR: Please adjust <FASTQ SUFFIX> in task sheet. Suffix not found in file name: %s" % cd["INPUT FILES TRIMMED"][i])
-
 					if td["SINGLE PAIR"] == "SE":
 						cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_SE")
-
 					elif td["SINGLE PAIR"] == "PE":
 						cd["INPUT FILES TRIMMED"][i] = cd["INPUT FILES TRIMMED"][i].replace(td["FASTQ SUFFIX"], "_PE")
-
 					else:
 						sys.exit("ERROR: Incorrect input into <PAIRED SUFFIX> task variable.")
 
@@ -135,7 +132,7 @@ def main():
 
 
 	######################
-	###   OUTPUT DIR   ###
+	###   SET OUTPUT   ###
 	######################
 
 	# OUTPUT PART 1: Convert OUTPUT DIR type to real directory
@@ -190,13 +187,10 @@ def main():
 	############################
 
 	submission_record = open("%s/submission_record.txt" % record["red"], "a")
-
 	submit_time = commands.getoutput("grep '<SUBMITTED>' %s/submission_record.txt" % record["red"])
 	
 	if submit_time == "":
 		submission_record.write("<SUBMITTED> %s\n\n" % datetime.now().strftime("%m.%d.%Y %H:%M:%S"))
-
-	test_num = 1738
 
 	# Add task variables to script
 	cmd = cd["SCRIPT COMMAND"]
