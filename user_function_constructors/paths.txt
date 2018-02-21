@@ -1,5 +1,6 @@
 # file_name	input_name	description
-function_download.txt	download	download data from SLIMS via rsync FTP
+function_download_SLIM.txt	download_slim	download data from SLIMS via rsync FTP
+function_download_SRR.txt	download_srr	download data from public server via fastq-dump SRR
 function_align.txt	align	STAR aligner
 function_featureCount.txt	feature	subread featureCounts
 function_rseqc_full.txt	rseqcCov	single genome coverage plot for all data

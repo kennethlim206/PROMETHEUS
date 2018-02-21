@@ -34,10 +34,12 @@ def main():
 	# PART 1: Parse URL input separately from other types.
 	if cd["INPUT DIR"] == "ONLINE":
 		if cd["INPUT TYPE"] == "URL":
-			print "URL" #CODE HERE
+			cd["INPUT FILES FULL"].append(td["FTP COMMAND"])
+			cd["INPUT FILES TRIMMED"].append("ALL")
 
 		elif cd["INPUT TYPE"] == "SRR":
-			print "SRR"
+			cd["INPUT FILES FULL"] = td["SRR IDs"].split(",")
+			cd["INPUT FILES TRIMMED"] = td["SRR IDs"].split(",")
 
 		else:
 			sys.exit("ERROR: <INPUT TYPE> variable in function constructor, %s must be URL or SRR when <INPUT DIR> is ONLINE.")
@@ -64,7 +66,7 @@ def main():
 			cd["INPUT FILES FULL"] = tools.get_FASTQs(cd["INPUT DIR"])
 		elif cd["INPUT TYPE"] == "BAM":
 			cd["INPUT FILES FULL"] = tools.get_BAMs(cd["INPUT DIR"])
-		elif "POST:" in cd["INPUT TYPE"]:
+		elif "OTHER:" in cd["INPUT TYPE"]:
 			SUFFIX = cd["INPUT TYPE"]
 			SUFFIX = SUFFIX.split(":")[1]
 			cd["INPUT FILES FULL"] = tools.get_other(cd["INPUT DIR"], SUFFIX)

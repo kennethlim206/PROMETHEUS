@@ -24,7 +24,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> DOWNLOAD
+<FUNCTION NAME> DOWNLOAD_SRR
 
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> 
@@ -50,7 +50,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 <INPUT DIR> ONLINE
 
 # Type of input file into this command (URL, SRR, FASTQ, BAM, OTHER:[SUFFIX], NONE)
-<INPUT TYPE> URL
+<INPUT TYPE> SRR
 
 # Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
 <INPUT MULT> SINGLE
@@ -77,6 +77,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 <SCRIPT COMMAND> {
 
-rsync -avL slimsdata.genomecenter.ucdavis.edu::slims/<INPUT FILES FULL> <OUTPUT DIR>
+module load sratoolkit
+
+fastq-dump --outdir <OUTPUT DIR> --gzip -I --split-files <INPUT FILES FULL>
 
 }

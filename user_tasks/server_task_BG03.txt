@@ -22,9 +22,9 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 
 USER NAME: Justin Lim
 
-CURRENT DATE: 01/03/18
+CURRENT DATE: 02/20/18
 
-DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3, 1/1.
+DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data BGSC03, 1/1.
 
 
 
@@ -37,13 +37,14 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •-------------------------------------------- DOWNLOAD --------------------------------------------•
 
 # The URL given by SLIMS for downloading data via FTP/rsync request.
-<FTP COMMAND> # http://slimsdata.genomecenter.ucdavis.edu/Data/xo8evn0v4/UnalignedL7/Project_ANIZ_L3_H1189P_Zdilar/
+<FTP COMMAND> vektvy870j/Unaligned3/Project_ANIZ_L6_BGSC03/
+# http://slimsdata.genomecenter.ucdavis.edu/Data/vektvy870j/Unaligned3/Project_ANIZ_L6_BGSC03/
 
 # Single or multiple SRR IDs (comma delimited, if multiple) for download via fastq-dump.
 <SRR IDs> 
 
 # The directory where fastq files are downloaded. (*) 
-<RAW DATA DIR> /share/nordlab/rawdata/Project_ANIZ_L3_H1189P_Zdilar
+<RAW DATA DIR> /share/nordlab/rawdata/TEST_DOWNLOAD
 
 •----------------------------------------- SAMPLE ID INFO -----------------------------------------•
 
@@ -52,7 +53,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L003_R1_001.fastq.gz
+<FASTQ SUFFIX> _L006_R1_001.fastq.gz
 
 
 
@@ -110,7 +111,7 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •---------------------------------------- ALIGN PARAMETERS ----------------------------------------•
 
 # Full file path to STAR align output directory. (*)
-<POST DIR> /share/nordlab/users/kjulim/QUICK_TEST
+<POST DIR> /share/nordlab/users/kjulim/TEST_DATA
 
 # Whether sample fastq's are compressed or not (.gz, .bzip2).
 <ZIPPED> .gz
