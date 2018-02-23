@@ -35,8 +35,8 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 # Sbatch parameters
 <TIME> 24:00:00
 <PARTITION> gc128
-<CORES> 10
-<MEM PER CPU> 8G
+<CORES> default
+<MEM PER CPU> 8GB
 
 
 
@@ -79,9 +79,18 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 module load rseqc/2.6.3
 
-RPKM_saturation.py -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
-FPKM_count -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
-bam_stat.py -i <INPUT FILES FULL>
-read_GC.py -i <INPUT FILES FULL>
+bam_stat.py -i <INPUT FILES FULL> > <OUTPUT DIR>/bam_stat_<INPUT FILES TRIMMED>.txt
+
+# read_distribution.py -i <INPUT FILES FULL> -r <USE BED> > <OUTPUT DIR>/read_dist_<INPUT FILES TRIMMED>.txt
+
+read_duplication.py -i <INPUT FILES FULL> -o <OUTPUT DIR>/read_dup_<INPUT FILES TRIMMED>
+
+read_GC.py -i <INPUT FILES FULL> -o <OUTPUT DIR>/read_GC_<INPUT FILES TRIMMED>
+
 
 }
+
+# RPKM_saturation.py -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
+# FPKM_count -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
+# bam_stat.py -i <INPUT FILES FULL>
+# read_GC.py -i <INPUT FILES FULL>

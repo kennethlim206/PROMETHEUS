@@ -7,7 +7,7 @@ from datetime import datetime
 def main():
 
 	# If true, will not submit sbatch and return pseudo data instead
-	test = True
+	test = False
 	test_num = 1738
 
 	WORKING_DIR = os.getcwd()
