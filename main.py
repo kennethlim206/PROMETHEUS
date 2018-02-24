@@ -1,18 +1,20 @@
+import time
 import os
 import sys
 import imp
 import commands
+import datetime
 
-# User interface
 def main():
 
 	# Queue wait time
 	queue_time = 24
 	# If true, will not submit sbatch and return pseudo data instead
-	test = False
+	test = True
 
 	# Load progress report module
 	report = imp.load_source("report", "./processing_scripts/progress_report.py")
+	resubmit = imp.load_source("resubmit", "./processing_scripts/resubmit.py")
 
 	os.popen("chmod +x ./processing_scripts/*.sh")
 
@@ -30,7 +32,6 @@ def main():
 
 	# Keeps user in the interface, until they choose to exit
 	task_exit = False
-	function_exit = False
 	
 	while not task_exit:
 
@@ -38,6 +39,7 @@ def main():
 		print " ------------------------------------------------------------------------------- "
 		print "|            STEP 1: PLEASE CHOOSE THE ID OF YOUR TASK FILE OR EXIT             |"
 		print " ------------------------------------------------------------------------------- "
+		print ""
 
 		# Display all task options
 		input_files = os.listdir("./user_tasks")
@@ -48,7 +50,7 @@ def main():
 				
 		input_list.sort()
 		print " ID   Task Sheet"
-		print " ----------------"
+		print " ------------------------------------------------------------------------------- "
 		for i in range(0, len(input_list)):
 			print " %i = %s" % (i, input_list[i])
 
@@ -82,16 +84,21 @@ def main():
 		else:
 			print " You selected the input file: %s\n" % input_list[task_input]
 
-		while not function_exit:
+
+
+		function_input = ""
+		while function_input != "exit":
 
 			# Input function from user
 			print " ------------------------------------------------------------------------------- "
-			print "|                   STEP 2: PLEASE CHOOSE FUNCTION(S) OR EXIT                   |"
+			print "|                STEP 2: PLEASE CHOOSE FUNCTION(S) INPUT OR EXIT                |"
 			print " ------------------------------------------------------------------------------- "
 			print " Note: Users can perform functions sequentially with the '->' symbol."
-			print " Example: download -> align -> feature"
+			print " Example: get_slim -> align -> feature"
 			print ""
 
+			print " Input     Description"
+			print " ------------------------------------------------------------------------------- "
 			# Display all functions from function table
 			function_files = open("./user_function_constructors/paths.txt", "r")
 			function_options = dict()
@@ -111,6 +118,7 @@ def main():
 
 			print ""
 			print " report:[function] = reports progress (ex: report:feature)"
+			print " resubmit:[function] = resubmit single sample sbatch script"
 			print " exit"
 			print " ------------------------------------------------------------------------------- "
 			print ""
@@ -118,7 +126,7 @@ def main():
 			function_input = raw_input(" >>> ")
 
 			if function_input == "exit":
-				sys.exit(" Bye for now!")
+				break
 
 			if "report:" in function_input:
 				function_report_name = function_input.split(":")[1]
@@ -128,6 +136,15 @@ def main():
 					sys.exit(" ERROR: Inputted function name does not exist: %s" % function_report_name)
 						
 				report.main(task_input_path, "./user_function_constructors/%s" % function_options[function_report_name])
+
+			elif "resubmit:" in function_input:
+				function_report_name = function_input.split(":")[1]
+
+				# Error for non-existing user input
+				if function_report_name not in function_options:
+					sys.exit(" ERROR: Inputted function name does not exist: %s" % function_report_name)
+
+				resubmit.main(task_input_path, "./user_function_constructors/%s" % function_options[function_report_name])
 
 			else:
 
@@ -196,21 +213,21 @@ def main():
 
 				print ""
 				print " ------------------------------------------------------------------------------- "
-				print " Constructing queen module ..."
+				print " Constructing your module ..."
 				print ""
 
 				# Add time together
 				total_secs = 0
 				for tm in time_list:
-				    time_parts = [int(s) for s in tm.split(':')]
-				    total_secs += (time_parts[0] * 60 + time_parts[1]) * 60 + time_parts[2]
+					time_parts = [int(s) for s in tm.split(':')]
+					total_secs += (time_parts[0] * 60 + time_parts[1]) * 60 + time_parts[2]
 				total_secs, sec = divmod(total_secs, 60)
 				hr, m = divmod(total_secs, 60)
 				time_display = "%d:%02d:%02d" % (hr, m, sec)
-				time = "%d:%02d:%02d" % (hr+queue_time, m, sec)
+				t = "%d:%02d:%02d" % (hr+queue_time, m, sec)
 
 				# Sumbit QUEEN module
-				cmd = "sbatch --time=%s ./processing_scripts/queen_submitter.sh %s %s" % (time, task_input_path, function_string[:-1])
+				cmd = "sbatch --time=%s ./processing_scripts/queen_submitter.sh %s %s" % (t, task_input_path, function_string[:-1])
 				
 				status = 0
 				ID = "Submitted job as 1738"
@@ -226,34 +243,22 @@ def main():
 				else:
 					sys.exit(" ERROR:\n%s" % ID)
 
+			print ""
+			print " Returning to step 2 ..."
+			time.sleep(3)
+
+			print ""
 
 
-			# Ask to repeat
-			print " ------------------------------------------------------------------------------- "
-			print " Are there other functions you wish to run on your chosen dataset: %s ? (Y/N/exit)\n" % input_list[task_input]
-			more_function = raw_input(" >>> ")
-
-			if more_function == "N":
-				function_exit = True
-			elif more_function == "Y":
-				task_exit = False
-				function_exit = False
-			elif more_function == "exit":
-				sys.exit(" Bye for now!")
-			else:
-				sys.exit(" Incorrect input. Exiting program...")
 
 		print " ------------------------------------------------------------------------------- "
-		print " Would you like to choose a new dataset? (Y/N/exit)\n"
+		print " Would you like to select a different dataset to work with? (Y/N)\n"
 		more_task = raw_input(" >>> ")
 
 		if more_task == "N":
 			task_exit = True
 		elif more_task == "Y":
 			task_exit = False
-			function_exit = False
-		elif more_task == "exit":
-			sys.exit(" Bye for now!")
 		else:
 			sys.exit(" Incorrect input. Exiting program...")
 
