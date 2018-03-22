@@ -7,10 +7,12 @@ import datetime
 
 def main():
 
+	# trash_collector()
+
 	# Queue wait time
 	queue_time = 24
 	# If true, will not submit sbatch and return pseudo data instead
-	test = True
+	test = False
 
 	# Load progress report module
 	report = imp.load_source("report", "./processing_scripts/progress_report.py")
@@ -45,7 +47,7 @@ def main():
 		input_files = os.listdir("./user_tasks")
 		input_list = []
 		for file in input_files:
-			if file[0] != ".":
+			if file[0] != "." and file != "blank_task.txt":
 				input_list.append(file)
 				
 		input_list.sort()
@@ -259,22 +261,22 @@ def main():
 					else:
 						sys.exit(" ERROR:\n%s" % ID)
 
-					print ""
-
-					sys.stdout.write(" Returning to step 2 ")
-					sys.stdout.flush()
-					time.sleep(1)
-
-					for i in range(0,3):
-						sys.stdout.write(".")
-						sys.stdout.flush()
-						time.sleep(1)
-
-					print ""
-					print ""
-
 				else:
 					sys.exit(" ERROR: Chosen action does not exist.")
+
+			print ""
+
+			sys.stdout.write(" Returning to step 2 ")
+			sys.stdout.flush()
+			time.sleep(1)
+
+			for i in range(0,3):
+				sys.stdout.write(".")
+				sys.stdout.flush()
+				time.sleep(1)
+
+			print ""
+			print ""
 
 
 

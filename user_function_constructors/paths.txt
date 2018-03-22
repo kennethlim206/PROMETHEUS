@@ -5,3 +5,4 @@ function_align.txt	align	STAR aligner
 function_featureCount.txt	feature	subread featureCounts
 function_rseqc_full.txt	rqc_cov	single genome coverage plot for all data
 function_rseqc_ind.txt	rqc_ind	other useful rseqc functions
+function_mpileup.txt	pile	allele specific coverage counts

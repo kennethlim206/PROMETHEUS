@@ -18,7 +18,7 @@ def main():
 	# Load task info from reader
 	td = tools.task_reader(sys.argv[1])
 	cd = tools.function_reader(sys.argv[2])
-	gd = tools.genome_reader("%s/user_genome_tables/%s" % (WORKING_DIR, td["REF TABLE"]), td["REF ID"])
+	gd = tools.genome_reader("%s/genome_tables/%s" % (WORKING_DIR, td["REF TABLE"]), td["REF ID"])
 
 	td["WORKING DIR"] = WORKING_DIR
 
@@ -123,7 +123,7 @@ def main():
 			input_string = ""
 
 			for file in cd["INPUT FILES FULL"]:
-				input_string += "%s:" % file
+				input_string += "%s%s" % (file, separater)
 
 			cd["INPUT FILES FULL"] = [input_string[:-1]]
 			cd["INPUT FILES TRIMMED"] = ["ALL"]
@@ -184,15 +184,43 @@ def main():
 
 
 
-	############################
-	###   GENERATE SCRIPTS   ###
-	############################
+	#############################################
+	###   GET AMPLICON DATA (IF APPLICABLE)   ###
+	#############################################
 
-	submission_record = open("%s/submission_record.txt" % record["red"], "a")
-	submit_time = commands.getoutput("grep '<SUBMITTED>' %s/submission_record.txt" % record["red"])
-	
-	if submit_time == "":
-		submission_record.write("<SUBMITTED> %s\n\n" % datetime.now().strftime("%m.%d.%Y %H:%M:%S"))
+	# Error check, if AMP variables are called in function constructor, amp file must exist in task sheet
+	if ("AMP FILE" not in td) and ("<AMP NAME>" in cd["SCRIPT COMMAND"] or "<AMP CHROM>" in cd["SCRIPT COMMAND"] or "<AMP START>" in cd["SCRIPT COMMAND"] or "<AMP END>" in cd["SCRIPT COMMAND"]):
+		sys.exit("ERROR: No <AMP FILE> variable found in task sheet.")
+
+	if ("AMP FILE" in td) and ("<AMP NAME>" in cd["SCRIPT COMMAND"] or "<AMP CHROM>" in cd["SCRIPT COMMAND"] or "<AMP START>" in cd["SCRIPT COMMAND"] or "<AMP END>" in cd["SCRIPT COMMAND"]):
+		file = open("./amp_beds/%s" % td["AMP FILE"], "r")
+
+		cd["AMP INFO"] = dict()
+
+		for line in file:
+			line = line.replace("\n", "")
+
+			data = line.split("\t")
+			chrom = data[0]
+			start = data[1]
+			end = data[2]
+			name = data[3]
+
+			entry = [chrom, start, end]
+			cd["AMP INFO"][name] = entry
+
+		file.close()
+
+	# for amplicon in cd["AMP INFO"]:
+	# 	print "%s = %s:%s-%s" % (amplicon, cd["AMP INFO"][amplicon][0], cd["AMP INFO"][amplicon][1], cd["AMP INFO"][amplicon][2])
+		
+
+
+	################################
+	###   SUBSTITUTE VARIABLES   ###
+	################################
+
+	submit_paths = []
 
 	# Add task variables to script
 	cmd = cd["SCRIPT COMMAND"]
@@ -206,9 +234,6 @@ def main():
 		if var not in safe_list:
 			if "<%s>" % var in cmd:
 				cmd = cmd.replace("<%s>" % var, cd[var])
-
-	# Write and run script
-	return_string = ""
 
 	for i in range(0, len(cd["INPUT FILES FULL"])):
 		cmd_ind = cmd
@@ -227,46 +252,104 @@ def main():
 		# Final step turn double empty spaces into single empty spaces to account for non-existent variables
 		cmd_ind = cmd_ind.replace("  ", " ")
 
-		script_ind_path = "%s/%s_%s.sh" % (record["scripts"], cd["FUNCTION NAME"], input_trim_ind)
+		# Add jobs for each sample file
+		if "AMP INFO" not in cd:
+			script_ind_path = "%s/%s_%s.sh" % (record["scripts"], cd["FUNCTION NAME"], input_trim_ind)
 
-		# Place in RED of OUTPUT DIR
-		script_ind = open(script_ind_path, "w")
+			# Place in RED of OUTPUT DIR
+			script_ind = open(script_ind_path, "w")
 
-		script_ind.write("#!/bin/bash -l\n\n")
+			script_ind.write("#!/bin/bash -l\n\n")
 
-		# Required for sbatch script
-		script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
-		script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
-		script_ind.write("#SBATCH --output=%s/%s_%s.out\n" % (record["output"], cd["FUNCTION NAME"], input_trim_ind))
-		script_ind.write("#SBATCH --error=%s/%s_%s.err\n" % (record["error"], cd["FUNCTION NAME"], input_trim_ind))
-		script_ind.write("#SBATCH --workdir=%s\n" % record["directory"])
+			# Required for sbatch script
+			script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
+			script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
+			script_ind.write("#SBATCH --output=%s/%s_%s.out\n" % (record["output"], cd["FUNCTION NAME"], input_trim_ind))
+			script_ind.write("#SBATCH --error=%s/%s_%s.err\n" % (record["error"], cd["FUNCTION NAME"], input_trim_ind))
+			script_ind.write("#SBATCH --workdir=%s\n" % record["directory"])
 
-		# Optional for sbatch script
-		if cd["PARTITION"] != "default":
-			script_ind.write("#SBATCH --partition=%s\n" % cd["PARTITION"])
+			# Optional for sbatch script
+			if cd["PARTITION"] != "default":
+				script_ind.write("#SBATCH --partition=%s\n" % cd["PARTITION"])
 
-		if cd["CORES"] != "default":
-			script_ind.write("#SBATCH --cpus-per-task=%s\n" % cd["CORES"])
+			if cd["CORES"] != "default":
+				script_ind.write("#SBATCH --cpus-per-task=%s\n" % cd["CORES"])
 
-		if cd["MEM PER CPU"] != "default":
-			script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
+			if cd["MEM PER CPU"] != "default":
+				script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
 
-		script_ind.write("")
-		script_ind.write(cmd_ind)
-		script_ind.write("")
+			script_ind.write("")
+			script_ind.write(cmd_ind)
+			script_ind.write("")
 
-		script_ind.close()
+			script_ind.close()
+
+			submit_paths.append(script_ind_path)
+
+		# Add jobs for each sample + each amplicon
+		else:
+			for amplicon in cd["AMP INFO"]:
+
+				cmd_ind_amp = cmd_ind
+
+				cmd_ind_amp = cmd_ind_amp.replace("<AMP NAME>", amplicon)
+				cmd_ind_amp = cmd_ind_amp.replace("<AMP CHROM>", cd["AMP INFO"][amplicon][0])
+				cmd_ind_amp = cmd_ind_amp.replace("<AMP START>", cd["AMP INFO"][amplicon][1])
+				cmd_ind_amp = cmd_ind_amp.replace("<AMP END>", cd["AMP INFO"][amplicon][2])
+
+				input_trim_ind_amp = "%s_%s" % (input_trim_ind, amplicon)
+
+				script_ind_path = "%s/%s_%s.sh" % (record["scripts"], cd["FUNCTION NAME"], input_trim_ind_amp)
+
+				# Place in RED of OUTPUT DIR
+				script_ind = open(script_ind_path, "w")
+
+				script_ind.write("#!/bin/bash -l\n\n")
+
+				# Required for sbatch script
+				script_ind.write("#SBATCH --job-name=%s\n" % cd["FUNCTION NAME"])
+				script_ind.write("#SBATCH --time=%s\n" % cd["TIME"])
+				script_ind.write("#SBATCH --output=%s/%s_%s.out\n" % (record["output"], cd["FUNCTION NAME"], input_trim_ind_amp))
+				script_ind.write("#SBATCH --error=%s/%s_%s.err\n" % (record["error"], cd["FUNCTION NAME"], input_trim_ind_amp))
+				script_ind.write("#SBATCH --workdir=%s\n" % record["directory"])
+
+				# Optional for sbatch script
+				if cd["PARTITION"] != "default":
+					script_ind.write("#SBATCH --partition=%s\n" % cd["PARTITION"])
+
+				if cd["CORES"] != "default":
+					script_ind.write("#SBATCH --cpus-per-task=%s\n" % cd["CORES"])
+
+				if cd["MEM PER CPU"] != "default":
+					script_ind.write("#SBATCH --mem-per-cpu=%s\n" % cd["MEM PER CPU"])
+
+				script_ind.write("")
+				script_ind.write(cmd_ind_amp)
+				script_ind.write("")
+
+				script_ind.close()
+
+				submit_paths.append(script_ind_path)
 
 
 
+	#########################
+	###   SUBMIT SCRIPT   ###
+	#########################
 
-		#########################
-		###   SUBMIT SCRIPT   ###
-		#########################
+	return_string = ""
+	submission_record = open("%s/submission_record.txt" % record["red"], "a")
+	submission_record.write("TEST\n")
+	submit_time = commands.getoutput("grep '<SUBMITTED>' %s/submission_record.txt" % record["red"])
+	
+	if submit_time == "":
+		submission_record.write("<SUBMITTED> %s\n\n" % datetime.now().strftime("%m.%d.%Y %H:%M:%S"))
 
-		pre_submit_print = "%i/%i" % (i+1, len(cd["INPUT FILES FULL"]))
+	for i in range (0, len(submit_paths)):
+		sp = submit_paths[i]
 
-		submit_cmd = "sbatch %s" % script_ind_path
+		pre_submit_print = "%i/%i" % (i+1, len(submit_paths))
+		submit_cmd = "sbatch %s" % sp
 		
 		status = 0
 		ID = "Submitting job as %i" % test_num
@@ -285,7 +368,7 @@ def main():
 			sys.exit("ERROR:\n%s" % ID)
 
 		# Output job submission statements
-		submission_record.write("%s\t%s\t%s\n" % (pre_submit_print, script_ind_path, ID))
+		submission_record.write("%s\t%s\t%s\n" % (pre_submit_print, sp, ID))
 
 		return_string += "%s:" % ID
 

@@ -13,6 +13,29 @@ def main(t,f):
 	td = tools.task_reader(t)
 	cd = tools.function_reader(f)
 
+	chosen = False
+
+	while not chosen:
+		if cd["AUTO CALL"] == "":
+			chosen = True
+		else:
+			auto_cd = tools.function_reader("./user_function_constructors/%s" % cd["AUTO CALL"])
+
+			print ""
+			print " Your selected function has an auto-called function. Please select one to view:"
+			print " %s" % cd["FUNCTION NAME"]
+			print " %s" % auto_cd["FUNCTION NAME"]
+			print ""
+
+			new_f = raw_input(" >>> ")
+
+			if new_f == auto_cd["FUNCTION NAME"]:
+				cd = auto_cd
+			elif new_f == cd["FUNCTION NAME"]:
+				chosen = True
+			else:
+				sys.exit(" ERROR: Incorrect input. Please select one of the given functions.")
+
 	LOOKUP_DIR = ""
 	if cd["OUTPUT DIR"] == "RAW":
 		LOOKUP_DIR = td["RAW DATA DIR"]
@@ -152,8 +175,9 @@ def main(t,f):
 
 		view = ""
 		while view != "done":
+			print " ------------------------------------------------------------------------------- "
 			print " Input error file name as listed above to view its contents,"
-			print " or type 'done' to return to the main menu."
+			print " or type 'done' to return to the step 2 menu."
 			print ""
 
 			view = raw_input(" >>> ")
@@ -166,10 +190,10 @@ def main(t,f):
 					sys.exit(" ERROR: The name you inputted does not exist.")
 
 				print " From path: %s" % path
+				print " ------------------------------------------------------------------------------- "
 				print ""
 				print commands.getoutput("cat %s" % path)
 				print ""
-
 
 if __name__ == '__main__':
 	main()

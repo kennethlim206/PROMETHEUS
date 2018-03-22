@@ -22,9 +22,9 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 
 USER NAME: Justin Lim
 
-CURRENT DATE: 02/22/18
+CURRENT DATE: 03/21/18
 
-DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
+DESCRIPTION: More bulk RNA-seq, 1/1.
 
 
 
@@ -38,13 +38,13 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 
 # The URL given by SLIMS for downloading data via FTP/rsync request.
 # http://slimsdata.genomecenter.ucdavis.edu/Data/
-<FTP COMMAND> 2zrdf2r0w2/Unaligned/Project_ANIZ_L7_BGSC01
+<FTP COMMAND> sibrd8036s/Unaligned/Project_ANIZ_H1322_Zdilar/
 
 # Single or multiple SRR IDs (comma delimited, if multiple) for download via fastq-dump.
 <SRR IDs> 
 
 # The directory where fastq files are downloaded. (*) 
-<RAW DATA DIR> /share/nordlab/rawdata/Project_ANIZ_L7_BGSC01
+<RAW DATA DIR> /share/nordlab/rawdata/Project_ANIZ_H1322_Zdilar
 
 •----------------------------------------- SAMPLE ID INFO -----------------------------------------•
 
@@ -53,7 +53,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L007_R1_001.fastq.gz
+<FASTQ SUFFIX> _L008_R1_001.fastq.gz
 
 
 
@@ -100,10 +100,10 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 <INDEX DIR> /share/nordlab/users/kjulim/STAR_INDEX/Mouse_ensembl_GRCm38_100bp_CUSTOM
 
 # STAR parameter, number of available cores on server (cabernet = 8). (*)
-<RUN THREAD> 8
+<RUN THREAD> 99
 
 # STAR parameter, read length of sample fastq -1. (*)
-<SJBD OVERHANG> 99
+<SJBD OVERHANG> 8
 
 # Other indexing parameters specific to this analysis.
 <INDEX PARAMS> 
@@ -111,7 +111,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 •---------------------------------------- ALIGN PARAMETERS ----------------------------------------•
 
 # Full file path to STAR align output directory. (*)
-<POST DIR> /share/nordlab/users/kjulim/BGSC01_processed
+<POST DIR> /share/nordlab/users/kjulim/RSCR01_processed
 
 # Whether sample fastq's are compressed or not (.gz, .bzip2).
 <ZIPPED> .gz
@@ -141,7 +141,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 <SAMTOOLS MODULE> samtools/1.4.1
 
 # Other feature count parameters
-<MPILEUP PARAMS> -t AD
+<MPILEUP PARAMS> 
 
 •------------------------------------------- OTHER CMDS -------------------------------------------•
 

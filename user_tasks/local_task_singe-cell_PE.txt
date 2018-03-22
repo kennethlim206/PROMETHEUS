@@ -37,11 +37,10 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •-------------------------------------------- DOWNLOAD --------------------------------------------•
 
 # The URL given by SLIMS for downloading data via FTP/rsync request.
-<FTP COMMAND> ev2pg7x5wj/Un/Project_ANIZ_L8_BGSC05/
-#http://slimsdata.genomecenter.ucdavis.edu/Data/ev2pg7x5wj/Un/Project_ANIZ_L8_BGSC05/
+<FTP COMMAND> http://slimsdata.genomecenter.ucdavis.edu/Data/ev2pg7x5wj/Un/Project_ANIZ_L8_BGSC05/
 
 # Single or multiple SRR IDs (comma delimited, if multiple) for download via fastq-dump.
-<SRR IDs> SRR1414
+<SRR IDs> 
 
 # The directory where fastq files are downloaded. (*) 
 <RAW DATA DIR> /Users/kennethlim/Desktop/TEST_DIR/raw_data
@@ -49,11 +48,11 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 •----------------------------------------- SAMPLE ID INFO -----------------------------------------•
 
 # Is the data single or paired end (SE or PE)? (*)
-<SINGLE PAIR> SE
+<SINGLE PAIR> PE
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> .fastq.gz
+<FASTQ SUFFIX> _L001_R1.fastq.gz
 
 
 
@@ -137,8 +136,8 @@ DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3,
 
 •---------------------------------------- SAMTOOLS MPILEUP ----------------------------------------•
 
-# Subread version
-<SUBREAD MODULE> subread/1.5.0-p1
+# Samtools version
+<SAMTOOLS MODULE> samtools/1.4.1
 
 # Other feature count parameters
 <MPILEUP PARAMS> -t AD

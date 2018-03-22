@@ -3,7 +3,7 @@
 #SBATCH --job-name=QUEEN
 #SBATCH --output=./temp/queen-%j.out
 #SBATCH --error=./temp/queen-%j.err
-#SBATCH --partition=gc256
+#SBATCH --partition=gc
 
 TASK="$1"
 FUNC="$2"

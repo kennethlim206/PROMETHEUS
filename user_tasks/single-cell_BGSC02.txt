@@ -137,8 +137,8 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 2/5.
 
 •---------------------------------------- SAMTOOLS MPILEUP ----------------------------------------•
 
-# Subread version
-<SUBREAD MODULE> subread/1.5.0-p1
+# Samtools version
+<SAMTOOLS MODULE> samtools/1.4.1
 
 # Other feature count parameters
 <MPILEUP PARAMS> -t AD

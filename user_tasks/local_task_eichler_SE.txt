@@ -22,9 +22,9 @@ This task sheet will be copied into your RED (RIPLEY Execution Directory).
 
 USER NAME: Justin Lim
 
-CURRENT DATE: 02/22/18
+CURRENT DATE: 01/03/18
 
-DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
+DESCRIPTION: A test of the new format RIPLEY, using bulk RNA-seq data RSCR00_L3, 1/1.
 
 
 
@@ -37,14 +37,14 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 •-------------------------------------------- DOWNLOAD --------------------------------------------•
 
 # The URL given by SLIMS for downloading data via FTP/rsync request.
-# http://slimsdata.genomecenter.ucdavis.edu/Data/
-<FTP COMMAND> 2zrdf2r0w2/Unaligned/Project_ANIZ_L7_BGSC01
+<FTP COMMAND> ev2pg7x5wj/Un/Project_ANIZ_L8_BGSC05/
+#http://slimsdata.genomecenter.ucdavis.edu/Data/ev2pg7x5wj/Un/Project_ANIZ_L8_BGSC05/
 
 # Single or multiple SRR IDs (comma delimited, if multiple) for download via fastq-dump.
-<SRR IDs> 
+<SRR IDs> SRR1414
 
 # The directory where fastq files are downloaded. (*) 
-<RAW DATA DIR> /share/nordlab/rawdata/Project_ANIZ_L7_BGSC01
+<RAW DATA DIR> /Users/kennethlim/Desktop/TEST_DIR/raw_data
 
 •----------------------------------------- SAMPLE ID INFO -----------------------------------------•
 
@@ -53,7 +53,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 
 # Suffix in file names to be removed when aligning fastq files.
 # For SE data this can be left blank. For PE data, use the suffix that denotes forward strand.
-<FASTQ SUFFIX> _L007_R1_001.fastq.gz
+<FASTQ SUFFIX> .fastq.gz
 
 
 
@@ -75,7 +75,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 <REF ID> 5
 
 # Whether you want custom additions to your reference genome/annotation (T or F). (*)
-<CUSTOMIZE> T
+<CUSTOMIZE> F
 
 •------------------------ CUSTOM VARIABLE PATHS (only if <CUSTOMIZE> == T) ------------------------•
 
@@ -111,7 +111,7 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 •---------------------------------------- ALIGN PARAMETERS ----------------------------------------•
 
 # Full file path to STAR align output directory. (*)
-<POST DIR> /share/nordlab/users/kjulim/BGSC01_processed
+<POST DIR> /Users/kennethlim/Desktop/TEST_DIR
 
 # Whether sample fastq's are compressed or not (.gz, .bzip2).
 <ZIPPED> .gz
@@ -146,4 +146,8 @@ DESCRIPTION: Bulk RNA for single-cell data analysis, 1/5.
 •------------------------------------------- OTHER CMDS -------------------------------------------•
 
 # Space for other post processing parameters
+
+# Amplicon names
+<AMP FILE> 408_amps_GRCh38_unflanked.bed
+
 
