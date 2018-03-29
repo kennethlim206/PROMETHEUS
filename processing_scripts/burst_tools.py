@@ -9,7 +9,7 @@ def get_other(directory, suffix):
 		return_list = sorted(sdout.split("\n"))
 
 		if return_list[0] == "":
-			sys.exit("ERROR: No files with the given suffix found in given directory: %s" % directory)
+			sys.exit("ERROR: No files with the given suffix: %s found in given directory: %s" % (suffix, directory))
 		else:
 			return return_list
 	else:

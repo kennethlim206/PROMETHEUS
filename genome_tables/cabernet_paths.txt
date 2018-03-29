@@ -49,7 +49,7 @@ ID	ORGANISM	SPECIES	ASSEMBLY	GENOME
 <REF ID> 5
 <REF FA> /share/nordlab/genomes/Mus_musculus/Ensembl/GRCm38/Sequence/WholeGenomeFasta/genome.fa
 <REF ANNO> /share/nordlab/genomes/Mus_musculus/Ensembl/GRCm38/Annotation/Genes/genes.gtf
-<REF BED> /share/nordlab/genomes/Mus_musculus/Ensembl/GRCm38/Annotation/Genes/genes.sorted.bed
+<REF BED> /share/nordlab/users/kjulim/mm10_GENCODE_VM9_basic.bed
 
 <REF ID> 6
 <REF FA> /share/nordlab/genomes/Mus_musculus/UCSC/mm10/Sequence/WholeGenomeFasta/genome.fa

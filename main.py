@@ -6,8 +6,10 @@ import commands
 import datetime
 
 def main():
-
-	# trash_collector()
+	
+	# Get rid of queen modules that have finished running
+	trash = imp.load_source("trash", "./processing_scripts/trash_collector.py")
+	trash.main()
 
 	# Queue wait time
 	queue_time = 24

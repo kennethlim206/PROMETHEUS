@@ -100,10 +100,10 @@ DESCRIPTION: More bulk RNA-seq, 1/1.
 <INDEX DIR> /share/nordlab/users/kjulim/STAR_INDEX/Mouse_ensembl_GRCm38_100bp_CUSTOM
 
 # STAR parameter, number of available cores on server (cabernet = 8). (*)
-<RUN THREAD> 99
+<RUN THREAD> 8
 
 # STAR parameter, read length of sample fastq -1. (*)
-<SJBD OVERHANG> 8
+<SJBD OVERHANG> 99
 
 # Other indexing parameters specific to this analysis.
 <INDEX PARAMS> 

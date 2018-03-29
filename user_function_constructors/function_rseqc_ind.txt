@@ -81,11 +81,12 @@ module load rseqc/2.6.3
 
 bam_stat.py -i <INPUT FILES FULL> > <OUTPUT DIR>/bam_stat_<INPUT FILES TRIMMED>.txt
 
-# read_distribution.py -i <INPUT FILES FULL> -r <USE BED> > <OUTPUT DIR>/read_dist_<INPUT FILES TRIMMED>.txt
+read_distribution.py -i <INPUT FILES FULL> -r <USE BED> > <OUTPUT DIR>/read_dist_<INPUT FILES TRIMMED>.txt
 
 read_duplication.py -i <INPUT FILES FULL> -o <OUTPUT DIR>/read_dup_<INPUT FILES TRIMMED>
 
 read_GC.py -i <INPUT FILES FULL> -o <OUTPUT DIR>/read_GC_<INPUT FILES TRIMMED>
+
 
 
 }

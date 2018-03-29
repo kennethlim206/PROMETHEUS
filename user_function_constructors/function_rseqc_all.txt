@@ -24,7 +24,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 |                                                                                                  |
 •--------------------------------------------------------------------------------------------------•
 
-<FUNCTION NAME> RSEQC_FULLCOV
+<FUNCTION NAME> RSEQC_COV
 
 # Function to be run automatically after this one (constructor file name)
 <AUTO CALL> 
@@ -53,7 +53,7 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 <INPUT TYPE> BAM
 
 # Analyze one file per script command or all files at once (SINGLE/ALL:[SEPARATOR])
-<INPUT MULT> ALL::
+<INPUT MULT> ALL:,
 
 
 
@@ -79,6 +79,6 @@ This function constructor sheet will be copied into your RED (RIPLEY Execution D
 
 module load rseqc/2.6.3
 
-geneBody_coverage.py -f pdf -i <INPUT FILES FULL> -o <OUTPUT DIR> -r <USE BED>
+geneBody_coverage.py -f pdf -o <OUTPUT DIR>/ -r <USE BED> -i <INPUT FILES FULL>
 
 }
