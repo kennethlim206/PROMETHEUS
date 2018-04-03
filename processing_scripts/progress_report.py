@@ -21,20 +21,24 @@ def main(t,f):
 		else:
 			auto_cd = tools.function_reader("./user_function_constructors/%s" % cd["AUTO CALL"])
 
-			print ""
-			print " Your selected function has an auto-called function. Please select one to view:"
-			print " %s" % cd["FUNCTION NAME"]
-			print " %s" % auto_cd["FUNCTION NAME"]
-			print ""
-
-			new_f = raw_input(" >>> ")
-
-			if new_f == auto_cd["FUNCTION NAME"]:
-				cd = auto_cd
-			elif new_f == cd["FUNCTION NAME"]:
+			if auto_cd["OUTPUT DIR"] == cd["OUTPUT DIR"]:
 				chosen = True
 			else:
-				sys.exit(" ERROR: Incorrect input. Please select one of the given functions.")
+				print ""
+				print " Your selected function has an auto-called function with data stored in a different directory."
+				print " Please select one to view:"
+				print " %s" % cd["FUNCTION NAME"]
+				print " %s" % auto_cd["FUNCTION NAME"]
+				print ""
+
+				new_f = raw_input(" >>> ")
+
+				if new_f == auto_cd["FUNCTION NAME"]:
+					cd = auto_cd
+				elif new_f == cd["FUNCTION NAME"]:
+					chosen = True
+				else:
+					sys.exit(" ERROR: Incorrect input. Please select one of the given functions.")
 
 	LOOKUP_DIR = ""
 	if cd["OUTPUT DIR"] == "RAW":

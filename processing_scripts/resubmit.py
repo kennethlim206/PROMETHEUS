@@ -43,8 +43,44 @@ def main(t,f):
 	if not os.path.isfile(SUB):
 		sys.exit(" ERROR: You have chosen a directory that does not contain a submission record: %s" % RED)
 
-	for script in SCR:
-		print script
+	sbatch_scripts = tools.get_other(SCR, ".sh")
+
+	print ""
+	print " SUBMISSION SCRIPTS:"
+	print " ------------------------------------------------------------------------------- "
+
+	for full_path in sbatch_scripts:
+		print " %s" % full_path.rsplit("/", 1)[1]
+
+	done = False
+	while not done:
+
+		print ""
+		print " Note: Resubmitting is for individual script failture. If all jobs failed, consider using the 'submit' option instead."
+		print " The existing sbatch output and error files will be archived and replaced with the resubmitted versions."
+		print ""
+		print " ------------------------------------------------------------------------------- "
+		print " Input the name of the selected script below, or type 'done' to return to Step 2."
+		print ""
+
+		selected_script = raw_input(" >>> ")
+
+		if selected_script == "done":
+			done = True
+
+		else:
+			selected_script_path = "%s/%s" % (SCR, selected_script)
+
+			if not os.path.isfile(selected_script_path):
+				sys.exit(" ERROR: You have chosen a script name that does not exist: %s" % selected_script)
+
+
+
+		
+
+	
+
+
 
 	
 
