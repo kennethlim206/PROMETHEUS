@@ -57,6 +57,7 @@ def populate(directory, task, function):
 	make_d["error"] = "%s/sbatch_error" % make_d["red"]
 	make_d["scripts"] = "%s/sbatch_scripts" % make_d["red"]
 	make_d["user"] = "%s/user_input" % make_d["red"]
+	make_d["archive"] = "%s/archive" % make_d["red"]
 
 	if not os.path.isdir(make_d["root directory"]):
 			os.popen("mkdir %s" % make_d["root directory"])

@@ -39,6 +39,7 @@ def main(t,f):
 	ERR = "%s/sbatch_error" % RED
 	SCR = "%s/sbatch_scripts" % RED
 	SUB = "%s/submission_record.txt" % RED
+	ARC = "%s/archive" % RED
 
 	if not os.path.isfile(SUB):
 		sys.exit(" ERROR: You have chosen a directory that does not contain a submission record: %s" % RED)
@@ -56,8 +57,9 @@ def main(t,f):
 	while not done:
 
 		print ""
-		print " Note: Resubmitting is for individual script failture. If all jobs failed, consider using the 'submit' option instead."
-		print " The existing sbatch output and error files will be archived and replaced with the resubmitted versions."
+		print " Note: Resubmission is for individual script failure."
+		print " If all your jobs failed, consider using the 'submit' option instead."
+		print " The existing sbatch files will be archived and replaced with the resubmitted versions."
 		print ""
 		print " ------------------------------------------------------------------------------- "
 		print " Input the name of the selected script below, or type 'done' to return to Step 2."
@@ -70,21 +72,49 @@ def main(t,f):
 
 		else:
 			selected_script_path = "%s/%s" % (SCR, selected_script)
+			selected_output_path = "%s/%s" % (OUT, selected_script.replace(".sh", ".out"))
+			selected_error_path = "%s/%s" % (ERR, selected_script.replace(".sh", ".err"))
 
 			if not os.path.isfile(selected_script_path):
 				sys.exit(" ERROR: You have chosen a script name that does not exist: %s" % selected_script)
 
+			print ""
+			print " Resubmitting ..."
+
+			# Move output and error to archive
+			now = datetime.now().strftime("%m.%d.%Y-%H:%M:%S")
+			archive_time_dir = "%s/%s" % (ARC, now)
+
+			if not os.path.isdir(archive_time_dir):
+				os.popen("mkdir %s" % archive_time_dir)
+
+			os.popen("mv %s %s" % (selected_output_path, archive_time_dir))
+			os.popen("mv %s %s" % (selected_error_path, archive_time_dir))
+
+			# Copied from burst
+			status, ID = commands.getstatusoutput("sbatch %s" % selected_script_path)
+
+			# Analyze result of sbatch submission
+			if status == 0:
+
+				ID_split = ID.split(" ")
+				ID = int(ID_split[3])
+			
+			else:
+				sys.exit("ERROR:\n%s" % ID)
+
+			# Output job submission statements
+			submission_record = open(SUB, "a")
+
+			submission_record.write("%s\t%s\t%s\n" % ("1/1", selected_script_path, ID))
+			submission_record.write("\n")
+			submission_record.close()
+
+			print ""
+			print " Your resubmission job was successfully submitted: %s" % ID
+			print ""
 
 
-		
-
-	
-
-
-
-	
-
-	
 
 if __name__ == '__main__':
 	main()
